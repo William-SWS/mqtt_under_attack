@@ -1,8 +1,17 @@
 # MQTT Under Attack documentation!
 
-## Description
 
-Análise exploratória utilizando o dataset
+## 📂 Dataset Utilizado
+
+Este projeto utiliza como objeto de estudo o **MQTT_UAD (MQTT Under Attack Dataset)**, um conjunto de dados público focado na detecção de ataques em redes IoT baseadas no protocolo MQTT.
+
+**Referência Original:**
+> Alaiz-Moretón, Héctor; Aveleira-Mata, Jose Antonio; Díez Fernández, Saúl; Muñoz Castañeda, Ángel Luis; García-Rodríguez, Isaías; Benavides, Carmen; Benítez-Andrades, José Alberto (2023). **MQTT_UAD: MQTT Under Attack Dataset. A public dataset for the detection of attacks in IoT networks using MQTT protocol**. figshare. Dataset. 
+> DOI: [10.6084/m9.figshare.24420958.v1](https://doi.org/10.6084/m9.figshare.24420958.v1)
+
+**Licença:**
+O dataset é distribuído sob a licença [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+
 
 ## Observação de licença de uso
 
