@@ -57,3 +57,8 @@ Index(['frame.time_delta',
 - Serem metadados do wireshark
 - Identificadores categóricos
 - Conteúdo textual
+
+### Passos após a plotagem dos primeiros gráficos
+- Criar uma branch para fazer a remoção de outliers
+- Se necessário criar uma nova branch para fazer uma nova abordagem 
+- Utilizei a biblioteca seaborn para calcular de forma automática a margem dos 95% pedidos
