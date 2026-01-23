@@ -58,6 +58,12 @@ Index(['frame.time_delta',
 - Identificadores categóricos
 - Conteúdo textual
 
+
+### Mostragem dos primeiros resultados
+
+![alt text](resultado_analise_exploratoria_1.png)
+
+
 ### Passos após a plotagem dos primeiros gráficos
 - Criar uma branch para fazer a remoção de outliers
 - Se necessário criar uma nova branch para fazer uma nova abordagem 
