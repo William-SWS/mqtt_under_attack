@@ -2,11 +2,11 @@
 
 Estas variáveis não são exclusivas do MQTT; elas descrevem o pacote físico trafegando na rede. São geradas pelo analisador (Wireshark).
 
-| **Variável**           | **Significado Detalhado**                                                                                                                                                                                     |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`frame.time_delta`** | O tempo (em segundos) que passou entre a captura do pacote _anterior_ e o pacote _atual_. **Importância:** Em ataques DoS, esse valor tende a ser muito próximo de zero (inundação de pacotes).               |
-| **`frame.cap_len`**    | _Captured Length_. O tamanho do pacote que foi efetivamente capturado e salvo no disco. Às vezes, para economizar espaço, capturam-se apenas os primeiros bytes (slicing), mas aqui parece ser o pacote todo. |
-| **`frame.len`**        | _Wire Length_. O tamanho real do pacote quando ele passou pelo cabo/rede. Geralmente é igual ao `cap_len`, a menos que o pacote tenha sido cortado na captura.                                                |
+| **Variável**           | **Significado Detalhado**                                                                                                                                                                                     | Dtype   |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| **`frame.time_delta`** | O tempo (em segundos) que passou entre a captura do pacote _anterior_ e o pacote _atual_. **Importância:** Em ataques DoS, esse valor tende a ser muito próximo de zero (inundação de pacotes).               | float64 |
+| **`frame.cap_len`**    | _Captured Length_. O tamanho do pacote que foi efetivamente capturado e salvo no disco. Às vezes, para economizar espaço, capturam-se apenas os primeiros bytes (slicing), mas aqui parece ser o pacote todo. | int64   |
+| **`frame.len`**        | _Wire Length_. O tamanho real do pacote quando ele passou pelo cabo/rede. Geralmente é igual ao `cap_len`, a menos que o pacote tenha sido cortado na captura.                                                | int64   |
 
 - **Fonte:** [Wireshark Display Filter Reference: Frame](https://www.wireshark.org/docs/dfref/f/frame.html)
 
@@ -15,12 +15,12 @@ Estas variáveis não são exclusivas do MQTT; elas descrevem o pacote físico t
 
 Estas descrevem o cabeçalho fixo ou variáveis presentes na maioria dos pacotes MQTT.
 
-| **Variável**         | **Significado Detalhado**                                                                                                                                                            |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **`mqtt.msgtype`**   | O tipo da mensagem (Packet Type). É um número inteiro que diz o que o pacote está fazendo.<br><br>  <br><br>Exemplos: `1` = CONNECT, `3` = PUBLISH, `8` = SUBSCRIBE, `12` = PINGREQ. |
-| **`mqtt.len`**       | O tamanho apenas da parte da mensagem MQTT (excluindo cabeçalhos TCP/IP e Ethernet). Diz quanto de dados úteis (payload) o MQTT está carregando.                                     |
-| **`mqtt.ver`**       | A versão do protocolo MQTT. Geralmente `3` (v3.1) ou `4` (v3.1.1).                                                                                                                   |
-| **`mqtt.proto_len`** | O comprimento do nome do protocolo. No MQTT v3.1.1, o nome é "MQTT", então esse valor costuma ser 4.                                                                                 |
+| **Variável**         | **Significado Detalhado**                                                                                                                                                            | Dtype   |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------- |
+| **`mqtt.msgtype`**   | O tipo da mensagem (Packet Type). É um número inteiro que diz o que o pacote está fazendo.<br><br>  <br><br>Exemplos: `1` = CONNECT, `3` = PUBLISH, `8` = SUBSCRIBE, `12` = PINGREQ. | float64 |
+| **`mqtt.len`**       | O tamanho apenas da parte da mensagem MQTT (excluindo cabeçalhos TCP/IP e Ethernet). Diz quanto de dados úteis (payload) o MQTT está carregando.                                     | float64 |
+| **`mqtt.ver`**       | A versão do protocolo MQTT. Geralmente `3` (v3.1) ou `4` (v3.1.1).                                                                                                                   | float64 |
+| **`mqtt.proto_len`** | O comprimento do nome do protocolo. No MQTT v3.1.1, o nome é "MQTT", então esse valor costuma ser 4.                                                                                 |         |
 
 
 ### 3. Conexão e Autenticação (Pacote CONNECT)
@@ -49,11 +49,11 @@ Estas variáveis aparecem apenas quando um cliente tenta se conectar ao Broker (
 
 Variáveis enviadas do Servidor para o Cliente confirmando a conexão.
 
-|**Variável**|**Significado Detalhado**|
-|---|---|
-|**`mqtt.conack.val`**|_Connect Return Code_. O resultado da conexão.<br><br>  <br><br>`0` = Conexão Aceita. Outros valores (1-5) indicam erros (ex: protocolo inaceitável, falha de autenticação).|
-|**`mqtt.conack.flags.sp`**|_Session Present_. Indica se o servidor já tinha uma sessão salva para esse cliente (`1`) ou se é uma nova (`0`).|
-|**`mqtt.conack.flags.reserved`**|Bits reservados no pacote de resposta. Devem ser `0`.|
+| **Variável**                     | **Significado Detalhado**                                                                                                                                                    |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`mqtt.conack.val`**            | _Connect Return Code_. O resultado da conexão.<br><br>  <br><br>`0` = Conexão Aceita. Outros valores (1-5) indicam erros (ex: protocolo inaceitável, falha de autenticação). |
+| **`mqtt.conack.flags.sp`**       | _Session Present_. Indica se o servidor já tinha uma sessão salva para esse cliente (`1`) ou se é uma nova (`0`).                                                            |
+| **`mqtt.conack.flags.reserved`** | Bits reservados no pacote de resposta. Devem ser `0`.                                                                                                                        |
 
 
 
@@ -73,7 +73,14 @@ Variáveis relacionadas ao envio de dados (sensores, comandos, ou ataques de inu
 
 
 ### 6. Assinatura (Pacotes SUBSCRIBE / SUBACK)
-|**Variável**|**Significado Detalhado**|
-|---|---|
-|**`mqtt.sub.qos`**|O nível de QoS máximo que o cliente está solicitando ao assinar um tópico.|
-|**`mqtt.suback.qos`**|O nível de QoS que o servidor _concedeu_ ao cliente (pode ser menor ou igual ao solicitado, ou `128` indicando falha).|
+| **Variável**          | **Significado Detalhado**                                                                                              |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| **`mqtt.sub.qos`**    | O nível de QoS máximo que o cliente está solicitando ao assinar um tópico.                                             |
+| **`mqtt.suback.qos`** | O nível de QoS que o servidor _concedeu_ ao cliente (pode ser menor ou igual ao solicitado, ou `128` indicando falha). |
+
+
+
+
+# Resultado do df.info()
+
+![[Pasted image 20260128152119.png]]
