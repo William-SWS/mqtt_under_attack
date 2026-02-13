@@ -1,5 +1,5 @@
-from pathlib import Path
 from os import getenv
+from pathlib import Path
 
 from dotenv import load_dotenv
 from loguru import logger
@@ -20,10 +20,21 @@ INTERIM_DATA_DIR = DATA_DIR / "interim"
 PROCESSED_DATA_DIR = DATA_DIR / "processed"
 EXTERNAL_DATA_DIR = DATA_DIR / "external"
 
-MODELS_DIR = PROJ_ROOT / "models"
+# Models directory (can be overridden via .env)
+_default_models_dir = PROJ_ROOT / "models"
+MODELS_DIR = Path(getenv("MODELS_DIR", str(_default_models_dir)))
+logger.info(f"MODELS_DIR path is: {MODELS_DIR}")
 
-REPORTS_DIR = PROJ_ROOT / "reports"
-FIGURES_DIR = REPORTS_DIR / "figures"
+# Reports directory (can be overridden via .env)
+_default_reports_dir = PROJ_ROOT / "reports"
+REPORTS_DIR = Path(getenv("REPORTS_DIR", str(_default_reports_dir)))
+logger.info(f"REPORTS_DIR path is: {REPORTS_DIR}")
+
+# Figures directory (can be overridden via .env)
+# By default, it's inside REPORTS_DIR, but can be set independently
+_default_figures_dir = REPORTS_DIR / "figures"
+FIGURES_DIR = Path(getenv("FIGURES_DIR", str(_default_figures_dir)))
+logger.info(f"FIGURES_DIR path is: {FIGURES_DIR}")
 
 # If tqdm is installed, configure loguru with tqdm.write
 # https://github.com/Delgan/loguru/issues/135
