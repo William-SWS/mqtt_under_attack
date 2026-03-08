@@ -1,0 +1,7 @@
+name: mqtt
+channels:
+  - defaults
+dependencies:
+  - python=3.13.11
+  - ipykernel
+prefix: /home/william/miniconda3/envs/mqtt
