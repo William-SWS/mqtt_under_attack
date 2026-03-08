@@ -1,5 +1,5 @@
+import os
 from pathlib import Path
-from os import getenv
 
 from dotenv import load_dotenv
 from loguru import logger
@@ -11,8 +11,7 @@ PROJ_ROOT = Path(__file__).resolve().parents[1]
 logger.info(f"PROJ_ROOT path is: {PROJ_ROOT}")
 
 # Base data directory (can be overridden via .env)
-_default_data_dir = PROJ_ROOT / "data"
-DATA_DIR = Path(getenv("DATA_DIR", str(_default_data_dir)))
+DATA_DIR = Path(os.getenv("DATA_DIR", PROJ_ROOT / "data")).expanduser().resolve()
 logger.info(f"DATA_DIR path is: {DATA_DIR}")
 
 RAW_DATA_DIR = DATA_DIR / "raw"

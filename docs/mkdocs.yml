@@ -2,3 +2,10 @@ site_name: MQTT Under Attack
 # 
 site_author: William-SWS
 # 
+nav:
+  - Início: index.md
+  - Começando: getting-started.md
+  - Descrição dos dados: data_description.md
+  - Dicionário de dados: dicionario_de_dados.md
+  - Features numéricas: Features numéricas.md
+  - Projeto: projeto.md

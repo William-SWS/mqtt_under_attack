@@ -1,0 +1,233 @@
+## Documentação: Métodos de Seleção de Features
+
+### Resumo dos Métodos Implementados
+
+Este notebook implementou **6 métodos** de seleção de features para o dataset DoS do MQTT Under Attack:
+
+| Método | Categoria | Abordagem |
+|--------|-----------|-----------|
+| mRMR | Filter | Informação Mútua |
+| Fisher's Score | Filter | Variância inter/intra classes |
+| Correlação de Pearson | Filter | Correlação linear |
+| ExtraTreesClassifier | Embedded | Importância baseada em árvores |
+| LinearSVC (L1) | Embedded | Coeficientes do modelo |
+| Lasso (L1) | Embedded | Regularização L1 |
+
+---
+
+### 1. mRMR (Minimum Redundancy Maximum Relevance)
+
+**O que é:**
+O mRMR é um método de seleção de features que otimiza dois critérios simultaneamente:
+- **Máxima Relevância**: seleciona features com alta correlação com o target
+- **Mínima Redundância**: penaliza features correlacionadas entre si
+
+**Implementação:**
+```python
+from mrmr import mrmr_classif
+selected_features = mrmr_classif(X=X, y=y, K=15)
+```
+
+**Pontos importantes:**
+- Requer instalação: `pip install mrmr-selection`
+- Usa informação mútua para calcular relevância e redundância
+- A ordem das features retornadas indica importância (1ª mais importante)
+- Computacionalmente mais caro que métodos univariados
+
+**Quando usar:**
+- Quando há muitas features correlacionadas entre si
+- Quando se deseja um subconjunto diversificado de features
+- Para evitar multicolinearidade no modelo final
+
+---
+
+### 2. Fisher's Score
+
+**O que é:**
+O Fisher's Score mede a capacidade discriminativa de cada feature calculando a razão entre a variância **entre classes** (inter-class) e a variância **dentro das classes** (intra-class).
+
+$$F(f) = \frac{\sum_{c=1}^{C} n_c (\mu_c - \mu)^2}{\sum_{c=1}^{C} n_c \sigma_c^2}$$
+
+**Implementação:**
+```python
+def fisher_score(X, y):
+    # Para cada feature:
+    # between_class_var = Σ n_c * (μ_c - μ)²
+    # within_class_var = Σ n_c * σ_c²
+    # score = between / within
+```
+
+**Pontos importantes:**
+- Features com alto score separam bem as classes
+- É um método **univariado** (avalia cada feature independentemente)
+- Não considera redundância entre features
+- Sensível a outliers (usa variância)
+
+**Quando usar:**
+- Para problemas de classificação multiclasse
+- Quando a separabilidade linear entre classes é importante
+- Como baseline rápido para seleção inicial
+
+---
+
+### 3. Correlação de Pearson
+
+**O que é:**
+Mede a relação linear entre cada feature e o target. O valor varia de -1 a +1:
+- |r| próximo de 1: forte relação linear
+- |r| próximo de 0: sem relação linear
+
+$$r = \frac{\sum(x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum(x_i - \bar{x})^2} \sqrt{\sum(y_i - \bar{y})^2}}$$
+
+**Implementação:**
+```python
+from scipy.stats import pearsonr
+corr, p_value = pearsonr(feature, y)
+```
+
+**Pontos importantes:**
+- Usamos |r| (valor absoluto) pois correlações negativas também são úteis
+- O p-value indica significância estatística
+- Captura apenas relações **lineares**
+- Método muito rápido e interpretável
+
+**Quando usar:**
+- Para análise exploratória inicial
+- Quando se assume relação linear feature-target
+- Para interpretabilidade (coeficientes claros)
+
+---
+
+### 4. ExtraTreesClassifier (Extremely Randomized Trees)
+
+**O que é:**
+Ensemble de árvores de decisão que calcula a importância de features baseada na redução de impureza (Gini) média ao longo de todas as árvores.
+
+**Implementação:**
+```python
+from sklearn.ensemble import ExtraTreesClassifier
+model = ExtraTreesClassifier(n_estimators=100, random_state=42)
+model.fit(X, y)
+importances = model.feature_importances_
+```
+
+**Pontos importantes:**
+- Captura relações **não-lineares**
+- Robusto a outliers
+- Não requer normalização dos dados
+- A soma das importâncias = 1.0
+- Pode ter alta variância (usar random_state para reprodutibilidade)
+
+**Quando usar:**
+- Quando há relações não-lineares nos dados
+- Para obter ranking rápido de features
+- Como método complementar aos métodos lineares
+
+---
+
+### 5. LinearSVC com L1 (Support Vector Classifier)
+
+**O que é:**
+SVM linear com regularização L1 (Lasso) que força alguns coeficientes a zero, realizando seleção de features implicitamente.
+
+**Implementação:**
+```python
+from sklearn.svm import LinearSVC
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+svc = LinearSVC(C=0.1, penalty='l1', dual=False, max_iter=5000)
+svc.fit(X_scaled, y)
+importances = np.mean(np.abs(svc.coef_), axis=0)  # multiclasse
+```
+
+**Pontos importantes:**
+- **REQUER normalização** dos dados (StandardScaler)
+- `C` controla regularização: menor C = mais features zeradas
+- `dual=False` necessário para L1
+- Para multiclasse: média dos coeficientes absolutos
+- Produz modelo esparso
+
+**Quando usar:**
+- Quando se deseja seleção + modelo em um passo
+- Para datasets de alta dimensionalidade
+- Quando a separabilidade linear é aceitável
+
+---
+
+### 6. Lasso (L1 Regularization)
+
+**O que é:**
+Regressão linear com regularização L1 que minimiza:
+
+$$\min_{\beta} \frac{1}{2n} ||y - X\beta||_2^2 + \alpha ||\beta||_1$$
+
+O termo L1 (|β|) força coeficientes a zero.
+
+**Implementação:**
+```python
+from sklearn.linear_model import LassoCV
+
+lasso = LassoCV(cv=5, random_state=42, max_iter=10000)
+lasso.fit(X_scaled, y)
+importances = np.abs(lasso.coef_)
+```
+
+**Pontos importantes:**
+- **REQUER normalização** dos dados
+- `LassoCV` seleciona α ótimo via cross-validation
+- Originalmente para regressão, mas funciona para classificação binária/multiclasse ordinal
+- Produz modelo esparso e interpretável
+- Sensível a multicolinearidade (seleciona uma feature de grupos correlacionados)
+
+**Quando usar:**
+- Quando interpretabilidade é importante
+- Para redução agressiva de features
+- Quando há muitas features irrelevantes
+
+
+---
+
+## Conclusões e Recomendações
+
+### Comparação dos Métodos
+
+| Aspecto | mRMR | Fisher | Pearson | ExtraTrees | LinearSVC | Lasso |
+|---------|------|--------|---------|------------|-----------|-------|
+| **Tipo** | Filter | Filter | Filter | Embedded | Embedded | Embedded |
+| **Captura não-linearidade** | Parcial | Não | Não | ✅ Sim | Não | Não |
+| **Considera redundância** | ✅ Sim | Não | Não | Parcial | Parcial | Parcial |
+| **Requer normalização** | Não | Não | Não | Não | ✅ Sim | ✅ Sim |
+| **Velocidade** | Média | Rápida | Rápida | Média | Média | Média |
+| **Interpretabilidade** | Alta | Alta | Alta | Média | Alta | Alta |
+
+### Recomendações por Cenário
+
+1. **Análise Exploratória Rápida**
+   - Use: Pearson ou Fisher's Score
+   - Motivo: Rápidos e interpretáveis
+
+2. **Evitar Multicolinearidade**
+   - Use: mRMR
+   - Motivo: Minimiza redundância explicitamente
+
+3. **Relações Não-Lineares**
+   - Use: ExtraTreesClassifier
+   - Motivo: Baseado em árvores, captura interações
+
+4. **Modelo Esparso + Interpretável**
+   - Use: Lasso ou LinearSVC (L1)
+   - Motivo: Produzem modelos com poucos coeficientes não-zero
+
+5. **Consenso Robusto**
+   - Use: Features selecionadas por 4+ métodos
+   - Motivo: Alta confiabilidade, diferentes perspectivas concordam
+
+### Próximos Passos Sugeridos
+
+1. **Validar features de consenso** em modelo final
+2. **Análise de domínio**: interpretar o significado das features selecionadas no contexto MQTT
+3. **Feature engineering**: criar novas features baseadas nas mais importantes
+4. **Ensemble de seletores**: combinar rankings dos métodos para seleção final
