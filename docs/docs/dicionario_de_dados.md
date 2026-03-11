@@ -19,6 +19,28 @@ O dataset contém **94.625 registros** de tráfego de rede capturados via Wiresh
 
 ---
 
+## 🆕 Features Derivadas (Time Gaps)
+
+Estas features **não existem no dataset original** e foram criadas através de engenharia de atributos para capturar comportamentos temporais de ataques (rajadas de pacotes).
+
+### `publish_gap` ⭐
+- **Descrição**: Intervalo de tempo (em segundos) entre mensagens PUBLISH consecutivas.
+- **Derivação**: Calculada subtraindo o timestamp (`frame.time_epoch`) da mensagem PUBLISH atual pelo timestamp da mensagem PUBLISH anterior.
+  - **Filtro**: `mqtt.msgtype == 3` (PUBLISH).
+  - **Preenchimento**: Os valores calculados nas linhas de PUBLISH são propagados para as linhas subsequentes (`ffill`) até o próximo PUBLISH. O primeiro valor é preenchido com 0.
+- **Função**: Identifica a frequência de envio de dados. Em ataques de flood, esse valor tende a zero.
+- **Situação na Seleção**: 🚀 **Alta Relevância**. Selecionada por **6 de 6 métodos** (mRMR, Fisher, Pearson, ExtraTrees, LinearSVC, Lasso). É uma das features mais fortes para detecção.
+
+### `connect_gap`
+- **Descrição**: Intervalo de tempo (em segundos) entre mensagens CONNECT consecutivas.
+- **Derivação**: Calculada subtraindo o timestamp (`frame.time_epoch`) da mensagem CONNECT atual pelo timestamp da mensagem CONNECT anterior.
+  - **Filtro**: `mqtt.msgtype == 1` (CONNECT).
+  - **Preenchimento**: Propagação (`ffill`) similar ao `publish_gap`.
+- **Função**: Identifica tentativas frequentes de conexão ou reconexão (ataques de exaustão de conexão).
+- **Situação na Seleção**: verd **Média Relevância**. Selecionada por **3 de 6 métodos** (ExtraTrees, LinearSVC, Lasso). Útil para tipos específicos de ataque que envolvem o handshake de conexão.
+
+---
+
 ## ⭐ Features de Alta Relevância (Selecionadas por 6/6 métodos)
 
 As seguintes features foram selecionadas por **todos os 6 métodos de seleção** (mRMR, Fisher's Score, Pearson, ExtraTrees, LinearSVC, Lasso), sendo as mais importantes para detecção de DoS:
