@@ -1,0 +1,251 @@
+\documentclass[12pt]{article}
+
+\usepackage{sbc-template}
+\usepackage{graphicx,url}
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{array}
+\usepackage{makecell}
+\usepackage{cite}
+\usepackage{tabularx}
+\sloppy
+
+\title{Detecção de Ataques DoS em Redes MQTT usando métodos de aprendizado de máquina de baixo custo}
+
+\author{Samuel W. S. Almeida\inst{1}, Rafael L. Gomes\inst{1}}
+
+\address{Centro de Ciências e Tecnologia -- Universidade Estadual do Ceará (UECE)\\
+    60714-903 -- Fortaleza -- CE -- Brazil
+  \email{samuel.william@aluno.uece.br, rafa.lopes@uece.br}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This paper presents a machine learning pipeline for Denial of Service (DoS) attack detection in MQTT networks, leveraging computationally efficient models suitable for resource-constrained IoT edge devices. Using the public MQTT Under Attack Dataset, the pipeline combines temporal feature engineering, seven independent feature selection methods with Stability Selection for robustness guarantees, and Bayesian hyperparameter optimization via Optuna. Six classification models were evaluated: Random Forest, XGBoost, Decision Tree, Calibrated Gaussian Naive Bayes, K-Nearest Neighbors, and HistGradientBoosting. Two ensemble strategies were compared: VotingClassifier (soft and hard) and StackingClassifier with out-of-fold predictions. Performance was assessed through five-fold stratified cross-validation using Accuracy, Precision, Recall, F1-Macro, Matthews Correlation Coefficient, and Log Loss. Results demonstrate that shallow machine learning pipelines achieve competitive performance (F1=0.9713 for best ensemble) while maintaining full interpretability and deployment viability for edge IoT gateways.
+\end{abstract}
+
+\begin{resumo}
+Este trabalho apresenta um pipeline de aprendizado de máquina para detecção de ataques de Negação de Serviço (DoS) em redes MQTT, aproveitando modelos computacionalmente eficientes adequados a dispositivos IoT com restrições de recursos. Utilizando o dataset MQTT Under Attack Dataset, o pipeline combina engenharia de features temporais, sete seletores de características independentes com Stability Selection para garantias de robustez, e otimização bayesiana de hiperparâmetros via Optuna. Seis modelos de classificação foram avaliados: Random Forest, XGBoost, Decision Tree, Gaussian Naive Bayes calibrado, K-Nearest Neighbors e HistGradientBoosting. Duas estratégias de ensemble foram comparadas: VotingClassifier (soft e hard) e StackingClassifier com predições out-of-fold. A avaliação utilizou validação cruzada estratificada de cinco folds usando Acurácia, Precisão, Recall, F1-Macro, MCC e Log Loss. Os resultados demonstram que pipelines de aprendizado raso alcançam desempenho competitivo (F1=0,9713 para melhor ensemble) mantendo total interpretabilidade e viabilidade de implantação em gateways IoT de borda.
+\end{resumo}
+
+
+%% ============================================================
+\section{Introdução}
+%% ============================================================
+
+O protocolo MQTT tornou-se o padrão dominante em redes IoT por seu baixo consumo de recursos, leveza e modelo de comunicação baseado em publicação-assinatura. A centralização da comunicação em um único broker MQTT cria uma superfície de ataque crítica: um adversário que sature o broker com requisições maliciosas derruba toda a infraestrutura conectada sem comprometer dispositivos individuais. Ataques de Negação de Serviço (DoS) contra brokers MQTT representam ameaça crescente e significativa em ambientes industriais, residenciais e de infraestrutura crítica.
+
+A detecção eficiente desses ataques em dispositivos de borda — onde os recursos são limitados — permanece um problema aberto. Métodos baseados em signatures falham frente à variabilidade dos padrões de ataque; redes neurais profundas demandam recursos incompatíveis com gateways IoT típicos (Raspberry Pi, ARM Cortex-A53 com 256 MB a 8 GB de RAM).
+
+Este trabalho propõe um pipeline de aprendizado de máquina que responde essa lacuna com três propriedades fundamentais: a  eficiência computacional viável para borda, com modelos de complexidade máxima $O(d \cdot \log n)$; interpretabilidade explícita, com seleção de features auditável e modelos interpretáveis; e a robustez metodológica, com garantias probabilísticas via Stability Selection sobre a qualidade da seleção de atributos discriminativos.
+
+As contribuições principais são: derivação de duas features temporais (`publish\_gap` e `connect\_gap`) para detecção de flooding DoS sem vazamento de dados; avaliação sistemática de sete seletores com Stability Selection como agregador probabilístico robusto; comparação entre VotingClassifier e StackingClassifier com predições out-of-fold; otimização bayesiana integrada com validação cruzada estratificada aninhada; demonstração de que modelos de baixo custo rivalizam com arquiteturas profundas em precisão, mantendo viabilidade para implantação em borda.
+
+
+%% ============================================================
+\section{Trabalhos Relacionados}
+%% ============================================================
+
+Essa sessão apresenta os trabalhos acadêmicos e pesquisas que foram de extrema importância para
+as tomadas de decisão tanto na escolha e tratamento da base de dados, quanto nas decisões de 
+modelos de treinamento e montagem da pipeline de experimentos. Swain et al. propuseram análise 
+de sequências de mensagens MQTT para detectar ataques DoS/DDoS, alcançando acurácia de 99,79\% 
+com baixa sobrecarga computacional e capacidade de detectar cinco tipos de ataques diferentes. 
+Tuyishime et al. apresentaram o método SMDT (Statistical Moments Difference Thresholding) que
+reduz features de 33 para 5 enquanto mantém acurácia de 95\% em classificação binária,
+demonstrando que eficiência computacional é preservável sem sacrifício de desempenho.
+
+Díaz-Longueira et al. utilizaram exatamente o mesmo dataset deste trabalho (MQTT Under Attack Dataset) testando técnicas shallow learning (LDA, QDA, Naive Bayes, KNN, Decision Tree, Random Forest, GBT, MLP). Eles demonstraram que Random Forest alcança acurácia de 99\% e F1 Score de 80\% para ataques de Intrusão, confirmando competitividade de modelos de baixo custo para implantação em borda. Alaiz-Moreton et al. e Zeghida et al. exploraram métodos de ensemble (bagging, boosting, stacking) sobre MQTTset, demostrando que stacking produz melhorias significativas em F1 e MCC em relação a modelos individuais.
+
+As limitações em trabalhos existentes incluem: ausência de garantias teóricas na seleção de features, restrição a architecturas profundas inviáveis em borda, e pouca exploração de padrões temporais de flooding DoS. Este trabalho endereça todas essas lacunas simultaneamente, oferecendo Stability Selection com controle probabilístico de falsos positivos, seleção de modelos de baixo custo com interpretabilidade nativa, e derivação de features temporais específicas para padrões de flooding.
+
+
+%% ============================================================
+\section{Proposta Experimental}
+%% ============================================================
+
+\subsection{Dataset e Caracterização}
+
+Os experimentos utilizam o MQTT Under Attack Dataset obtido de Díaz-Longueira et al., capturado em ambiente MQTT controlado com broker Mosquitto, clientes em NodeMCU ESP8266 e Wireshark para análise de tráfego. O dataset DoS contém 94.625 pacotes balanceados (50\% DoS, $\approx$50\% normal) com 67 campos originais reduzidos para 29 features após limpeza.
+
+No dataset, certas características não nos interessaram, como por exemplo identificadores de 
+instâncias, artefatos do Wireshark e payloads textuais. Essas características, assim que identificadas, 
+foram retiradas da amostra a se trabalhar.
+
+O tratamento de outliers utiliza IQR Capping em vez de remoção, preservando eventos legítimos (rajadas, reconexões lentas) que são ratos no tráfego normal mas críticos para segurança. Valores ausentes substituem-se por zero (semanticamente correto para campos MQTT opcionais) e valores infinitos por zero (sentinela de ausência em cálculos de gap temporal).
+
+\subsection{Engenharia de Features Temporais}
+
+Ataques DoS em MQTT manifestam-se como anomalias de taxa de chegada: messagensde CONNECT ou PUBLISH em frequência muito superior ao tráfego legítimo. Features estruturais de pacote (tamanho, cabeçalhos) não capturam esse ritmo. Derivamos duas features temporais baseadas em `frame.time.epoch`, implementando o procedimento apresentado na equação (1):
+
+\begin{equation}
+\mathtt{publish\_gap}(p_j) = \tau_j - \tau_{j-1}, \quad \forall j \geq 2; \quad \mathtt{publish\_gap}(p_1) = 0
+\label{eq:publish_gap}
+\end{equation}
+
+Onde `publish\_gap` é o intervalo entre mensagens MQTT tipo PUBLISH consecutivas (mqtt.msgtype=3), e `connect\_gap` analogamente para CONNECT (mqtt.msgtype=1). O cálculo dessas novas features
+é feito pensando em não haver data leakage (vazamento de dados): os dados são divididos 
+em treino e teste em uma proporção de 70/30 para preceder qualquer derivação de gap; cada partição calcula gaps independentemente, garantindo que informação de teste não contamina features de treino.
+
+\subsection{Pipeline em 3 Etapas}
+
+\textbf{Etapa Baseline}: Aqui temos um Split de dados 70/30, com as 29 features, hiperparâmetros padrão. O 
+objetivo é estabelecer uma referência honesta sem seleção nem otimização.
+
+\textbf{Etapa de  Seleção de Características}: Sete seletores independentes (mRMR, Fisher, Pearson, ExtraTrees, LinearSVC L1, LassoCV, LowVariance) com agregação por Stability Selection (100 subamostras de 70\% do dataset sem reposição). Gera 7 datasets estáveis por seletor, mais 2 datasets de consenso. Stability Selection oferece garantias probabilísticas sobre falsos positivos, diferente de voting heurístico.
+
+\textbf{Etapa Final:} Validação cruzada estratificada de 5 folds externos. Para cada fold: Stability Selection re-executada (30 bootstraps de 70\%) sobre dados de treino do fold (para assegurar que não ocorra 
+data leakage), onde temos o  Optuna que otimiza 6 modelos em paralelo (20 trials, 3-fold CV interno, métrica F1-macro); VotingClassifier soft e hard para fazer a comparação de 
+desempenho e StackingClassifier OOF que avalia no fold de validação. 
+Métricas finais reportadas como média ± desvio padrão sobre os 5 folds.
+
+
+%% ============================================================
+\section{Métodos}
+%% ============================================================
+
+\subsection{Seletores de Características}
+
+Sete métodos de seleção independentes são implementados com propósito triplo: reduzir overfitting, acelerar inferência em borda, identificar features causalmente relevantes. Cada seletor é re-executado dentro de cada fold de CV, garantindo ausência de vazamento.
+
+\begin{itemize}
+    \item \textbf{mRMR (Minimum Redundancy Maximum Relevance)}: seleciona iterativamente features maximizando relevância com target e minimizando redundância interna usando informação mútua; penaliza features co-lineares como `frame.len` e `frame.cap\_len`, resultando em conjuntos compactos (14 features selecionadas). 
+    \item  \textbf{Fisher Score}: quantifica separabilidade de classes via razão dispersão inter/intra-classe; computacionalmente eficiente e identifica features com distribuições distintas entre DoS e normal como `frame.time\_delta` (15 features).
+    \item \textbf{Correlação de Pearson}: captura relações lineares monotônicas com target; simples, reprodutível, adequado para features de timing com relação monotônica com intensidade de ataque (15 features, idêntico a Fisher neste dataset).
+    
+    \item \textbf{ExtraTrees treina}: 100 árvores aleatorizadas extraindo importância por redução média ponderada de impureza Gini; captura relações não-lineares e interações entre features (15 features).
+    
+    \item  \textbf{LinearSVC L1}:realiza seleção esparsificante forçando coeficientes de features irrelevantes a zero; identificou `mqtt.conflag.retain` ausente em outros seletores (15 features).
+    
+    \item \textbf{LassoCV}: minimiza regressão L1 com $\alpha$ ótimo por 5-fold CV; identificou `mqtt.conflag.passwd` com correlação linear com DoS (15 features).
+    
+    \item \textbf{LowVariance}: remove features com variância zero como sanidade; conjunto coincide com mRMR, confirmando que features de variância zero são irrelevantes (14 features).
+    
+    \item \textbf{Agregação por Stability Selection}: 100 subamostras de 70\% do dataset executadas para cada seletor; frequência de seleção $\hat{\Pi}_j$ calcula-se como fração de subamostras em que feature $j$ foi selecionada. Features com $\hat{\Pi}_j \geq 0{,}60$ são declaradas estáveis. Escolha de 70\% vs. 50\% original justifica-se por: ExtraTrees precisa amostras suficientes por classe para convergência de importâncias; features temporais como `publish\_gap` têm padrões raros requerendo representação adequada em subamostras. Vantagem metodológica é controle probabilístico sobre falsos positivos com bound teórico $E[|FP|] \leq 19{,}0$ para parâmetros ($q=0{,}70$; $\pi_{thr}=0{,}60$; $p_\Phi=15$; $p=29$).
+    
+\end{itemize}
+\subsection{Modelos de Classificação}
+
+Os seis modelos de treinamento que foram selecionados refletem restrições reais de sistemas com recursos limitados, alinhando-se com shallow learning. Quanto a interpretabilidade, Árvores permitem extração direta de regras, Random Forest e XGBoost admitem análise de importância de features.
+Aplicabilidade IoT: Decision Tree serializado ocupa ~100 KB; Random Forest comprimido com 15 árvores ocupa ~3 MB — viáveis para flash de gateways. Inferência não requer conexão à nuvem, tornando sistema resiliente.
+
+Quanto aos hiperparâmetros do experimento: o Random Forest foi trabalhado com 200 árvores, paralelizado; XGBoost 
+(história implicit de gradientes, regularização L1/L2), Decision Tree (hiperparâmetro crítico: max\_depth), Gaussian Naive Bayes Calibrado (CalibratedClassifierCV com isotônico para não punir muito os valores durante treino), K-Nearest Neighbors (kd-tree para aceleração), HistGradientBoosting (histogram binning, 10-50× mais rápido que GBT clássico).
+
+A Otimização Bayesiana foi realizada via Optuna com TPE (Tree-structured Parzen Estimator): aplica-se em validação cruzada estratificada aninhada. CV externo (5 folds) estimam desempenho generalizado, onde dentro de cada fold, Optuna usa 3-fold CV interno para tunar 20 trials por modelo, visando calcular a  métrica F1-macro. MedianPruner descarta trials com desempenho intermediário abaixo da mediana, reduzindo custo de otimização em ~30\% sem sacrificar qualidade.
+
+\subsection{Estratégias de Ensemble}
+
+\textbf{VotingClassifier}: calcula média ponderada de probabilidades (soft) ou voto majoritário direto (hard). Soft Voting dá peso aos modelos mais confiantes mas é sensível a modelos mal calibrados como Gaussian Naive Bayes. Hard Voting é mais robusto mas ignora magnitude de confiança — predição de 51\% e 99\% tratadas equivalentemente. O hard voting é utilizado aqui para 
+ter como parâmetro se os modelos mais leves computacionalmente vão ser satisfatórios em comparação.
+
+StackingClassifier: opera em dois níveis. No nível 0: 6 base models geram predições out-of-fold (OOF) com 3-fold CV — 
+onde cada predição feita por modelo que nunca viu aquela amostra, preservando avaliação out-of-sample. Enquanto no 
+Nível 1, a  Regressão Logística aprende pesos adaptativos dos 6 modelos, descobrindo automaticamente que GaussianNB deve ter peso menor e XGBoost/RandomForest pesos maiores. Utilizamos o parâmetro `passthrough=False`, que mantém meta-modelo com apenas 7 parâmetros ($M+1$), prevenindo overfitting. Stacking supera melhor modelo individual em 7 de 9 datasets com ganho médio 0,002 pp F1.
+
+
+%% ============================================================
+\section{Experimentos e Resultados}
+%% ============================================================
+
+\subsection{Etapa Baseline}
+
+Sem seleção de features, com 29 features completos e hiperparâmetros padrão, XGBoost e Stacking OOF lideram (Tabela \ref{tab:resultados_consolidado}). Stacking supera XGBoost individual em 0,003 pp F1 (0,97077 vs. 0,97047) sem qualquer otimização — demonstrando valor de combinação adaptativa. VotingClassifier ficou abaixo do melhor individual porque Gaussian Naive Bayes, mesmo calibrado, produz probabilidades em escala diferente dos demais, distorcendo a média ponderada. Efeito corrigido por Stacking que aprende pesos adaptativos.
+
+\subsection{Etapa Final com Stability Selection}
+
+Random Forest com dataset LassoCV alcança F1=0,97110 (melhor individual); Stacking OOF com dataset mRMR alcança F1=0,97125 (melhor ensemble). Estabilidade intra-fold é perfeita: mesmo conjunto estável em todos 5 folds para todos os 9 datasets, validando que threshold 0,60 com 30 bootstraps é suficientemente conservador para uso em produção.
+
+Frequência de Stability Selection: A Tabela 1 apresenta frequências de seleção para top features por seletor através de 100 subamostras de 70\% do dataset. Uma frequência de 1.0 indica seleção em 100\% dos casos — feature universalmente discriminativa independente de subset de dados. Enquanto frequência de 0.986 (publish\_gap) indica seleção em 99 de 100 casos, ocorrendo
+rejeição apenas pelo LinearSVC\_L1. Já frequência de 0.857 (mqtt.msgtype) indica moderada instabilidade. Frequência de 0.286 (mqtt.conflag.retain) indica borderline, com seleção apenas em 2 seletores (LinearSVC\_L1, LassoCV). Nosso resultado notável é de
+que 11 features atingem frequência 1.0 , um núcleo universalmente discriminativo impossível de garantir com voting heurístico. Esse núcleo forma modelo mínimo viável com robustez garantida a distribuições futuras de tráfego.
+
+\begin{table}[h]
+\centering
+\footnotesize
+\caption{Resumo de Resultados: Baseline vs. Etapas de Seleção e Otimização}
+\label{tab:resultados_consolidado}
+\begin{tabularx}{\linewidth}{|X|c|c|c|c|c|}
+\hline
+\textbf{Pipeline / Modelo} & \textbf{Features} & \textbf{F1-Macro} & \textbf{Acurácia} & \textbf{MCC} & \textbf{Log Loss} \\ \hline
+Baseline - XGBoost & 29 & 0,97047 & 0,97055 & 0,94139 & 0,07812 \\
+\hline
+Baseline - Stacking OOF & 29 & 0,97077 & 0,97083 & 0,94168 & 0,08853 \\
+\hline
+Final - Best Individual (RF + LassoCV) & 12 & 0,97110 & 0,97108 & 0,94237 & 0,25641 \\
+\hline
+Final - Best Ensemble (Stacking + mRMR) & 14 & 0,97125 & 0,97122 & 0,94280 & 0,08687 \\
+\hline
+\end{tabularx}
+\end{table}
+
+\begin{table}[h]
+\centering
+\footnotesize
+\caption{Frequências de Stability Selection (100 bootstraps de 70\%) por Seletor e Feature}
+\label{tab:stability}
+\begin{tabularx}{\linewidth}{|c|c|c|c|c|c|c|c|}
+\hline
+\textbf{Feature} & \textbf{Freq.} & \textbf{mRMR} & \textbf{Fisher} & \textbf{LinSVC} & \textbf{ExtraTrees} & \textbf{LassoCV} & \textbf{LowVar} \\
+\hline
+frame.time\_delta & 1.0 & 1.0 & 1.0 & 1.0 & 1.0 & 1.0 & 1.0 \\
+mqtt.len & 1.0 & 1.0 & 1.0 & 1.0 & 1.0 & 1.0 & 1.0 \\
+mqtt.topic\_len & 1.0 & 1.0 & 1.0 & 1.0 & 1.0 & 1.0 & 1.0 \\
+connect\_gap & 1.0 & 1.0 & 1.0 & 1.0 & 1.0 & 1.0 & 1.0 \\
+publish\_gap & 0.986 & 1.0 & 1.0 & 0.9 & 1.0 & 1.0 & 1.0 \\
+mqtt.msgtype & 0.857 & 1.0 & 1.0 & 1.0 & 1.0 & 0.0 & 1.0 \\
+mqtt.conflag.retain & 0.286 & 0.0 & 0.0 & 1.0 & 0.0 & 1.0 & 0.0 \\
+mqtt.conflag.passwd & 0.157 & 0.0 & 0.0 & 0.1 & 0.0 & 1.0 & 0.0 \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsection{Análise de Resultados}
+
+O ganho sobre baseline (Tabela \ref{tab:resultados_consolidado}) é modesto (+0,00048 pp F1 para Stacking com Stability Selection) — baseline com Stacking já é forte (0,97077). Contribuição principal é metodológica: Stability Selection prova robustez da seleção através de perturbação controlada, oferecendo garantias teóricas que voting heurístico não fornece.
+
+A hierarquia de modelos é consistente: XGBoost $\approx$ RandomForest $>$ HistGradientBoosting $>$ DecisionTree $>$ KNN $\gg$ GaussianNB\_Cal. O  Stability Selection não altera hierarquia relativa, apenas assegura que features utilizadas são mais robustamente relevantes. Convergência intra-fold perfeita (mesmo conjunto estável em todos 5 folds) valida que método é determinístico e estável para produção.
+
+Log Loss em Stacking é sistematicamente maior (~0,087) que em XGBoost individual (~0,076), refletindo composição de calibrações onde meta-modelo agrega ligeira sobre-dispersão. Para aplicações dependentes de probabilidades bem calibradas (alertas com threshold P(DoS)>0,8), modelos individuais XGBoost/RandomForest são preferíveis; para aplicações focadas em classe predita, Stacking supera.
+
+Implicação prática: núcleo de 11 features com frequência 1.0 (`frame.time\_delta`, `frame.cap\_len`, `frame.len`, `mqtt.clientid\_len`, `mqtt.conack.flags.reserved`, `mqtt.conack.flags.sp`, `mqtt.conack.val`, `mqtt.conflag.cleansess`, `mqtt.len`, `mqtt.topic\_len`, `connect\_gap`) fornece modelo mínimo viável com garantias de robustez a distribuições futuras. Random Forest com 15 árvores otimizado oferece melhor trade-off entre desempenho, interpretabilidade e custo computacional para implantação em borda.
+
+
+%% ============================================================
+\section{Discussão}
+%% ============================================================
+
+Não obstante modelos testados serem shallow learning de baixo custo, desempenho (F1=0,97125 para melhor ensemble) é competitivo com arquiteturas profundas reportadas em literatura. Implicação é que para problemas bem delimitados como detecção binária de DoS em tráfego MQTT, engenharia de features refinada combinada com algoritmos clássicos supera deep learning em desempenho-custo-interpretabilidade.
+
+Escolha de 70\% em subamostras Stability Selection (vs. 50\% original) justifica-se por duas razões: (i) seletores model-based como ExtraTrees convergem melhor com amostras maiores por classe; (ii) features temporais (`publish\_gap`, `connect\_gap`) têm distribuições altamente variáveis requerendo representação adequada em subamostras. Trade-off é que 70\% são correlacionadas entre si (menos independentes), potencialmente subestimando variância de frequências; 100 bootstraps suficientemente grandes compensam isso.
+
+Convergência perfeita entre folds (mesmo conjunto estável em todos 5 folds) é resultado metodologicamente significativo: demonstra que threshold 0,60 é conservador o bastante para que 30 bootstraps intra-fold (vs. 100 globais) produzam idênticos resultados para features com frequência extrema (1.0 ou 0.0). Sensibilidade emerge apenas para features borderline (0,5–0,7).
+
+Limitações: (1) dataset é balanceado artificialmente (≈50/50); IoT real pode ter desbalanceamento severo; (2) features temporais derivadas são específicas ao protocolo MQTT — generalização a outros protocolos requeriria re-engenharia; (3) validação è apenas em laboratório — performance em produção pode divergir devido a drift de conceito ou adversários adaptativos.
+
+
+%% ============================================================
+\section{Conclusão}
+%% ============================================================
+
+Este trabalho demonstra que pipelines de shallow learning com seleção robusta de features e ensemble learning alcançam desempenho alto em detecção de DoS em MQTT (F1=0,97125) mantendo viabilidade total para implantação em dispositivos de borda IoT. Contribuição principal é integração de Stability Selection como mecanismo robusto de agregação, oferecendo garantias probabilísticas sobre qualidade da seleção contrastando com voting heurístico.
+
+Identificação de núcleo de 11 features universalmente estáveis (frequência 1.0) fornece modelo interpretável mínimo viável com robustez garantida. Validação cruzada estratificada aninhada com Optuna garante estimativas não-viesadas.
+
+Recomendação prática: conjunto de 11 features estáveis com RandomForest otimizado oferece melhor trade-off entre desempenho, interpretabilidade, custo computacional e robustez para sistemas de produção em borda.
+
+Trabalhos futuros: (1) avaliar em datasets IoT reais com desbalanceamento severo; (2) estender engenharia de features a outros protocolos IoT (CoAP, AMQP); (3) implementar detecção online com janelas deslizantes; (4) adaptar pipeline para ataques multiclasse (DoS, MitM, Intrusão).
+
+
+%% ============================================================
+\bibliographystyle{ieeetr}
+\bibliography{sbc-template}
+%% ============================================================
+
+\end{document}
