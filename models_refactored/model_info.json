@@ -1,0 +1,174 @@
+{
+  "consensus_features": [
+    "frame.cap_len",
+    "mqtt.len",
+    "mqtt.topic_len",
+    "mqtt.msgtype",
+    "mqtt.qos",
+    "frame.len",
+    "mqtt.retain",
+    "mqtt.conflag.uname",
+    "mqtt.kalive",
+    "connect_gap",
+    "publish_gap",
+    "mqtt.conflag.passwd",
+    "frame.time_delta",
+    "mqtt.conflag.qos",
+    "mqtt.conack.val",
+    "mqtt.conflag.willflag"
+  ],
+  "selected_features_by_method": {
+    "LowVariance": [
+      "frame.time_delta",
+      "frame.cap_len",
+      "frame.len",
+      "mqtt.clientid_len",
+      "mqtt.conack.val",
+      "mqtt.kalive",
+      "mqtt.len",
+      "mqtt.msgtype",
+      "mqtt.qos",
+      "mqtt.topic_len",
+      "publish_gap",
+      "connect_gap"
+    ],
+    "Pearson": [
+      "mqtt.conflag.passwd",
+      "mqtt.conflag.qos",
+      "mqtt.conflag.reserved",
+      "mqtt.conflag.retain",
+      "mqtt.conflag.uname",
+      "mqtt.conflag.willflag",
+      "mqtt.len",
+      "mqtt.msgtype",
+      "frame.len",
+      "frame.cap_len",
+      "mqtt.topic_len",
+      "mqtt.qos",
+      "mqtt.conack.flags.reserved",
+      "mqtt.retain",
+      "mqtt.conack.val"
+    ],
+    "Fisher": [
+      "mqtt.conflag.passwd",
+      "mqtt.conflag.qos",
+      "mqtt.conflag.reserved",
+      "mqtt.conflag.retain",
+      "mqtt.conflag.uname",
+      "mqtt.conflag.willflag",
+      "mqtt.len",
+      "mqtt.msgtype",
+      "frame.len",
+      "frame.cap_len",
+      "mqtt.topic_len",
+      "mqtt.qos",
+      "mqtt.conack.flags.reserved",
+      "mqtt.retain",
+      "mqtt.conack.val"
+    ],
+    "mRMR": [
+      "mqtt.len",
+      "mqtt.msgtype",
+      "mqtt.topic_len",
+      "frame.len",
+      "frame.cap_len",
+      "frame.time_delta",
+      "publish_gap",
+      "mqtt.conack.val",
+      "mqtt.kalive",
+      "mqtt.conflag.qos",
+      "mqtt.conflag.uname",
+      "connect_gap",
+      "mqtt.retain",
+      "mqtt.conack.flags.sp",
+      "mqtt.conflag.cleansess"
+    ],
+    "LassoCV": [
+      "mqtt.len",
+      "frame.cap_len",
+      "mqtt.topic_len",
+      "mqtt.retain",
+      "publish_gap",
+      "connect_gap",
+      "mqtt.msgtype",
+      "mqtt.qos",
+      "mqtt.conflag.willflag",
+      "mqtt.kalive",
+      "mqtt.conflag.retain",
+      "mqtt.conflag.reserved",
+      "mqtt.conflag.qos",
+      "mqtt.conflag.uname",
+      "mqtt.conflag.passwd"
+    ],
+    "LinearSVC_L1": [
+      "frame.time_delta",
+      "mqtt.msgtype",
+      "mqtt.len",
+      "mqtt.kalive",
+      "mqtt.clientid_len",
+      "publish_gap",
+      "connect_gap",
+      "frame.cap_len",
+      "frame.len",
+      "mqtt.topic_len",
+      "mqtt.qos",
+      "mqtt.retain",
+      "mqtt.conflag.willflag",
+      "mqtt.conflag.uname",
+      "mqtt.conflag.passwd"
+    ],
+    "ExtraTrees": [
+      "mqtt.msgtype",
+      "mqtt.topic_len",
+      "mqtt.len",
+      "frame.len",
+      "frame.cap_len",
+      "frame.time_delta",
+      "publish_gap",
+      "mqtt.kalive",
+      "connect_gap",
+      "mqtt.conflag.cleansess",
+      "mqtt.clientid_len",
+      "mqtt.qos",
+      "mqtt.conack.flags.reserved",
+      "mqtt.retain",
+      "mqtt.conack.flags.sp"
+    ]
+  },
+  "optuna_best_params": {
+    "LDA": {
+      "solver": "svd"
+    },
+    "QDA": {
+      "reg_param": 0.06459859543810749
+    },
+    "GaussianNB": {
+      "var_smoothing": 1.951722464144953e-12
+    },
+    "DecisionTree": {
+      "max_depth": 9,
+      "min_samples_split": 15,
+      "min_samples_leaf": 6
+    },
+    "RandomForest": {
+      "n_estimators": 116,
+      "max_depth": 10,
+      "min_samples_split": 8,
+      "min_samples_leaf": 1
+    },
+    "GradientBoosting": {
+      "n_estimators": 116,
+      "max_depth": 6,
+      "learning_rate": 0.03504750508385013,
+      "min_samples_split": 11
+    }
+  },
+  "best_model_global": {
+    "categoria": "Otimizado (Optuna)",
+    "modelo": "DecisionTree (Optuna)",
+    "accuracy": 0.9753764861294584,
+    "precision": 0.9756646512110522,
+    "f1": 0.9753604559530865,
+    "log_loss": 0.08061290970694872
+  }
+}
