@@ -1,17 +1,17 @@
 # Relatorio de Analise: Deteccao de Ataques DoS em MQTT
 
-**Data:** 2026-04-02 22:58
+**Data:** 2026-04-22 15:29
 **Modelos avaliados:** LDA, QDA, GaussianNB, DecisionTree, RandomForest, GradientBoosting
 
 ## 1. Resultado Principal
-- Melhor modelo global: DecisionTree (Optuna) (Otimizado (Optuna))
+- Melhor modelo global: DecisionTree (Optuna (ExtraTrees))
 - Acuracia: 0.9754
 - Precisao: 0.9757
 - F1 Score: 0.9754
 - Log Loss: 0.0806
 
 ## 2. Metricas Obrigatorias por Etapa
-As quatro metricas obrigatorias (acuracia, precisao, f1 e log_loss) foram calculadas em baseline, selecao de features, ensemble e Optuna.
+As quatro metricas obrigatorias (acuracia, precisao, f1 e log_loss) foram calculadas em baseline, selecao de features, ensemble e Optuna (global e por seletor).
 
 ### Baseline
 | Modelo           |   accuracy |   precision |       f1 |   log_loss |
@@ -40,7 +40,7 @@ As quatro metricas obrigatorias (acuracia, precisao, f1 e log_loss) foram calcul
 | Soft Voting |   0.927926 |    0.93658  | 0.927354 |   0.10671  |
 | Averaging   |   0.925495 |    0.934599 | 0.924876 |   0.108458 |
 
-### Optuna
+### Optuna Global
 | modelo                    |   accuracy |   precision |       f1 |   log_loss |
 |:--------------------------|-----------:|------------:|---------:|-----------:|
 | DecisionTree (Optuna)     |   0.975376 |    0.975665 | 0.97536  |  0.0806129 |
@@ -49,6 +49,28 @@ As quatro metricas obrigatorias (acuracia, precisao, f1 e log_loss) foram calcul
 | LDA (Optuna)              |   0.923646 |    0.932385 | 0.923029 |  0.376519  |
 | QDA (Optuna)              |   0.923065 |    0.931535 | 0.922457 |  0.883461  |
 | GaussianNB (Optuna)       |   0.920581 |    0.928356 | 0.919992 |  2.8342    |
+
+### Optuna por Seletor - Melhor Modelo por Seletor
+| seletor      | modelo       |   n_features |   accuracy |   precision |       f1 |   log_loss |
+|:-------------|:-------------|-------------:|-----------:|------------:|---------:|-----------:|
+| ExtraTrees   | DecisionTree |           15 |   0.975376 |    0.975665 | 0.97536  |  0.0806129 |
+| LowVariance  | DecisionTree |           12 |   0.975376 |    0.975665 | 0.97536  |  0.0806129 |
+| LinearSVC_L1 | DecisionTree |           15 |   0.975376 |    0.975665 | 0.97536  |  0.0806129 |
+| mRMR         | DecisionTree |           15 |   0.975376 |    0.975665 | 0.97536  |  0.0806129 |
+| Fisher       | DecisionTree |           15 |   0.968085 |    0.968698 | 0.968051 |  0.107308  |
+| LassoCV      | DecisionTree |           15 |   0.968085 |    0.968698 | 0.968051 |  0.105586  |
+| Pearson      | DecisionTree |           15 |   0.968085 |    0.968698 | 0.968051 |  0.107308  |
+
+### Comparacao Sem Optuna vs Com Optuna por Seletor
+| seletor      | modelo_sem_optuna   |   f1_sem_optuna |   log_loss_sem_optuna | modelo_com_optuna   |   f1_com_optuna |   log_loss_com_optuna |    delta_f1 |
+|:-------------|:--------------------|----------------:|----------------------:|:--------------------|----------------:|----------------------:|------------:|
+| ExtraTrees   | GradientBoosting    |        0.97504  |             0.073568  | DecisionTree        |        0.97536  |             0.0806129 | 0.000320365 |
+| Fisher       | DecisionTree        |        0.96794  |             0.106537  | DecisionTree        |        0.968051 |             0.107308  | 0.000110525 |
+| LassoCV      | DecisionTree        |        0.96794  |             0.108282  | DecisionTree        |        0.968051 |             0.105586  | 0.000110256 |
+| LinearSVC_L1 | GradientBoosting    |        0.97504  |             0.0735972 | DecisionTree        |        0.97536  |             0.0806129 | 0.000320365 |
+| LowVariance  | GradientBoosting    |        0.97504  |             0.0736098 | DecisionTree        |        0.97536  |             0.0806129 | 0.000320365 |
+| Pearson      | DecisionTree        |        0.96794  |             0.106537  | DecisionTree        |        0.968051 |             0.107308  | 0.000110525 |
+| mRMR         | GradientBoosting    |        0.974987 |             0.0736257 | DecisionTree        |        0.97536  |             0.0806129 | 0.000373157 |
 
 ## 3. Analise de Falsos Positivos e Falsos Negativos
 Para cada seletor de caracteristicas, foram geradas matrizes de confusao para todos os modelos e tambem para o melhor modelo do seletor.
@@ -122,10 +144,18 @@ Para cada seletor de caracteristicas, foram geradas matrizes de confusao para to
 ## 4. Artefatos Gerados
 - reports_refactored/baseline_results.csv
 - reports_refactored/selection_results.csv
+- reports_refactored/best_model_by_selector.csv
 - reports_refactored/ensemble_results.csv
 - reports_refactored/optuna_results.csv
+- reports_refactored/optuna_by_selector_results.csv
+- reports_refactored/best_optuna_model_by_selector.csv
+- reports_refactored/optuna_by_selector_comparison.csv
+- reports_refactored/optuna_by_selector_best_params.json
+- reports_refactored/optuna_by_selector_confusion_matrices.json
 - reports_refactored/final_results_all_models.csv
 - reports_refactored/confusion_matrices_by_selector.json
 - reports_refactored/best_confusion_matrix_by_selector.json
 - reports_refactored/optuna_confusion_matrices.json
 - reports_refactored/RELATORIO_FINAL.md
+- models/models_optuna/*.pkl
+- models/models_refactored/*.pkl
