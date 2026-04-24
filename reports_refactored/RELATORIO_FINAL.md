@@ -1,6 +1,6 @@
 # Relatorio de Analise: Deteccao de Ataques DoS em MQTT
 
-**Data:** 2026-04-22 15:29
+**Data:** 2026-04-24 11:11
 **Modelos avaliados:** LDA, QDA, GaussianNB, DecisionTree, RandomForest, GradientBoosting
 
 ## 1. Resultado Principal
@@ -72,10 +72,57 @@ As quatro metricas obrigatorias (acuracia, precisao, f1 e log_loss) foram calcul
 | Pearson      | DecisionTree        |        0.96794  |             0.106537  | DecisionTree        |        0.968051 |             0.107308  | 0.000110525 |
 | mRMR         | GradientBoosting    |        0.974987 |             0.0736257 | DecisionTree        |        0.97536  |             0.0806129 | 0.000373157 |
 
-## 3. Analise de Falsos Positivos e Falsos Negativos
+## 3. Tempos de Execucao
+Os tempos foram medidos com `time.perf_counter()` e registrados em segundos. Em linhas onde a medida nao se aplica, o valor fica como `NaN`.
+
+### 3.1 Resumo Por Etapa
+| stage                            |   n_registros |   tempo_total_sec |   tempo_medio_sec |   tempo_min_sec |   tempo_max_sec |
+|:---------------------------------|--------------:|------------------:|------------------:|----------------:|----------------:|
+| optuna_by_selector_optimization  |            42 |        799.76     |         19.0419   |       3.73424   |       89.7074   |
+| optuna_global_optimization       |             6 |        132.675    |         22.1125   |       3.8245    |       83.1174   |
+| optuna_by_selector_training      |            42 |         48.2721   |          1.14934  |       0.069756  |        6.66566  |
+| feature_selection_selector_total |             7 |         45.7333   |          6.53333  |       4.82398   |        7.81524  |
+| feature_selection                |            42 |         38.5348   |          0.917494 |       0.065798  |        4.79492  |
+| optuna_global_training           |             6 |          8.6056   |          1.43427  |       0.0717599 |        6.29383  |
+| baseline                         |             6 |          6.9985   |          1.16642  |       0.0726271 |        4.93992  |
+| ensemble_base_training           |             6 |          6.82285  |          1.13714  |       0.069327  |        4.75189  |
+| ensemble_averaging               |             1 |          0.149475 |          0.149475 |       0.149475  |        0.149475 |
+| ensemble_soft_voting             |             1 |          0.148732 |          0.148732 |       0.148732  |        0.148732 |
+
+### 3.2 Resumo Por Modelo
+| modelo           |   n_registros |   tempo_total_sec |   tempo_medio_sec |   tempo_min_sec |   tempo_max_sec |
+|:-----------------|--------------:|------------------:|------------------:|----------------:|----------------:|
+| GradientBoosting |            25 |          645.93   |          25.8372  |       2.31256   |        89.7074  |
+| RandomForest     |            25 |          223.814  |           8.95255 |       0.736718  |        28.8325  |
+| QDA              |            25 |           49.4827 |           1.97931 |       0.101608  |         6.22409 |
+| DecisionTree     |            25 |           45.2867 |           1.81147 |       0.0716087 |         6.05913 |
+| LDA              |            25 |           45.2015 |           1.80806 |       0.107238  |         5.68132 |
+| GaussianNB       |            25 |           31.954  |           1.27816 |       0.065798  |         3.9963  |
+
+### 3.3 Resumo Por Seletor
+| seletor      |   n_registros |   n_features |   tempo_total_sec |   tempo_medio_sec |   tempo_min_sec |   tempo_max_sec |
+|:-------------|--------------:|-------------:|------------------:|------------------:|----------------:|----------------:|
+| ExtraTrees   |            19 |           15 |          164.074  |           8.63546 |       0.0704907 |         89.7074 |
+| mRMR         |            19 |           15 |          157.648  |           8.29728 |       0.0711419 |         84.7291 |
+| LinearSVC_L1 |            19 |           15 |          157.643  |           8.29698 |       0.0676885 |         89.3102 |
+| LowVariance  |            19 |           12 |          154.768  |           8.1457  |       0.065798  |         82.562  |
+| Fisher       |            19 |           15 |          101.382  |           5.33589 |       0.0704678 |         47.6009 |
+| Pearson      |            19 |           15 |          101.353  |           5.33435 |       0.0687082 |         47.4866 |
+| LassoCV      |            19 |           15 |           95.4325 |           5.02276 |       0.0681016 |         43.1259 |
+
+### 3.4 Etapas Mais Custosas
+| stage                            |   tempo_total_sec |   tempo_medio_sec |
+|:---------------------------------|------------------:|------------------:|
+| optuna_by_selector_optimization  |          799.76   |         19.0419   |
+| optuna_global_optimization       |          132.675  |         22.1125   |
+| optuna_by_selector_training      |           48.2721 |          1.14934  |
+| feature_selection_selector_total |           45.7333 |          6.53333  |
+| feature_selection                |           38.5348 |          0.917494 |
+
+## 4. Analise de Falsos Positivos e Falsos Negativos
 Para cada seletor de caracteristicas, foram geradas matrizes de confusao para todos os modelos e tambem para o melhor modelo do seletor.
 
-### 3.1 Melhor Modelo por Seletor - FP/FN por Classe
+### 4.1 Melhor Modelo por Seletor - FP/FN por Classe
 - LowVariance: modelo=GradientBoosting, F1=0.9750, FP=[97, 375], FN=[375, 97]
 - Pearson: modelo=DecisionTree, F1=0.9679, FP=[108, 498], FN=[498, 108]
 - Fisher: modelo=DecisionTree, F1=0.9679, FP=[108, 498], FN=[498, 108]
@@ -84,7 +131,7 @@ Para cada seletor de caracteristicas, foram geradas matrizes de confusao para to
 - LinearSVC_L1: modelo=GradientBoosting, F1=0.9750, FP=[97, 375], FN=[375, 97]
 - ExtraTrees: modelo=GradientBoosting, F1=0.9750, FP=[97, 375], FN=[375, 97]
 
-### 3.2 Matrizes de Confusao por Seletor
+### 4.2 Matrizes de Confusao por Seletor
 #### Seletor: LowVariance
 - LDA: FP=[37, 1404], FN=[1404, 37], CM=[[7699, 1404], [37, 9785]]
 - QDA: FP=[55, 1403], FN=[1403, 55], CM=[[7700, 1403], [55, 9767]]
@@ -141,9 +188,12 @@ Para cada seletor de caracteristicas, foram geradas matrizes de confusao para to
 - RandomForest: FP=[78, 403], FN=[403, 78], CM=[[8700, 403], [78, 9744]]
 - GradientBoosting: FP=[97, 375], FN=[375, 97], CM=[[8728, 375], [97, 9725]]
 
-## 4. Artefatos Gerados
+## 5. Artefatos Gerados
 - reports_refactored/baseline_results.csv
+- reports_refactored/baseline_timing_results.csv
 - reports_refactored/selection_results.csv
+- reports_refactored/selection_timing_results.csv
+- reports_refactored/selection_selector_timing_results.csv
 - reports_refactored/best_model_by_selector.csv
 - reports_refactored/ensemble_results.csv
 - reports_refactored/optuna_results.csv
@@ -152,6 +202,10 @@ Para cada seletor de caracteristicas, foram geradas matrizes de confusao para to
 - reports_refactored/optuna_by_selector_comparison.csv
 - reports_refactored/optuna_by_selector_best_params.json
 - reports_refactored/optuna_by_selector_confusion_matrices.json
+- reports_refactored/timing_results.csv
+- reports_refactored/timing_summary_by_stage.csv
+- reports_refactored/timing_summary_by_model.csv
+- reports_refactored/timing_summary_by_selector.csv
 - reports_refactored/final_results_all_models.csv
 - reports_refactored/confusion_matrices_by_selector.json
 - reports_refactored/best_confusion_matrix_by_selector.json
