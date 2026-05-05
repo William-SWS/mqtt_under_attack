@@ -1,6 +1,6 @@
 # Relatorio de Analise: Deteccao de Ataques DoS em MQTT
 
-**Data:** 2026-04-26 19:27
+**Data:** 2026-05-04 20:50
 **Modelos avaliados:** LDA, QDA, GaussianNB, DecisionTree, RandomForest, GradientBoosting
 
 ## 1. Resultado Principal
@@ -78,46 +78,46 @@ Os tempos foram medidos com `time.perf_counter()` e registrados em segundos. Em 
 ### 3.1 Resumo Por Etapa
 | stage                            |   n_registros |   tempo_total_sec |   tempo_medio_sec |   tempo_min_sec |   tempo_max_sec |
 |:---------------------------------|--------------:|------------------:|------------------:|----------------:|----------------:|
-| optuna_by_selector_optimization  |            42 |        703.956    |         16.7608   |       3.57591   |       66.8148   |
-| optuna_global_optimization       |             6 |        120.705    |         20.1175   |       3.67928   |       68.7792   |
-| feature_selection_selector_total |             7 |         49.3404   |          7.04863  |       5.29079   |        8.40678  |
-| feature_selection                |            42 |         42.1702   |          1.00405  |       0.0636075 |        5.13872  |
-| optuna_by_selector_training      |            42 |         22.9531   |          0.546502 |       0.0643667 |        2.17443  |
-| ensemble_base_training           |             6 |          7.61946  |          1.26991  |       0.0662857 |        5.21734  |
-| baseline                         |             6 |          7.53236  |          1.25539  |       0.0701891 |        5.38034  |
-| optuna_global_training           |             6 |          4.27229  |          0.712049 |       0.065821  |        2.20474  |
-| ensemble_soft_voting             |             1 |          0.157392 |          0.157392 |       0.157392  |        0.157392 |
-| ensemble_averaging               |             1 |          0.149009 |          0.149009 |       0.149009  |        0.149009 |
+| optuna_by_selector_optimization  |            42 |        717.064    |         17.0729   |       3.51357   |       72.9392   |
+| optuna_global_optimization       |             6 |        121.635    |         20.2725   |       3.91932   |       65.6524   |
+| feature_selection_selector_total |             7 |         47.7182   |          6.81689  |       4.99798   |        8.57226  |
+| feature_selection                |            42 |         40.6873   |          0.968745 |       0.0641613 |        5.54322  |
+| optuna_by_selector_training      |            42 |         23.501    |          0.559548 |       0.0626194 |        2.33625  |
+| ensemble_base_training           |             6 |          7.94304  |          1.32384  |       0.0709872 |        5.40025  |
+| baseline                         |             6 |          7.20142  |          1.20024  |       0.0705305 |        5.10709  |
+| optuna_global_training           |             6 |          4.16835  |          0.694725 |       0.0665492 |        2.13446  |
+| ensemble_soft_voting             |             1 |          0.169843 |          0.169843 |       0.169843  |        0.169843 |
+| ensemble_averaging               |             1 |          0.15635  |          0.15635  |       0.15635   |        0.15635  |
 
 ### 3.2 Resumo Por Modelo
 | modelo           |   n_registros |   tempo_total_sec |   tempo_medio_sec |   tempo_min_sec |   tempo_max_sec |
 |:-----------------|--------------:|------------------:|------------------:|----------------:|----------------:|
-| GradientBoosting |            25 |          502.837  |          20.1135  |       1.03804   |        68.7792  |
-| RandomForest     |            25 |          239.135  |           9.56539 |       0.444067  |        31.6484  |
-| QDA              |            25 |           48.0814 |           1.92326 |       0.101169  |         6.25309 |
-| DecisionTree     |            25 |           45.426  |           1.81704 |       0.0789804 |         5.76229 |
-| LDA              |            25 |           43.6088 |           1.74435 |       0.107825  |         5.36341 |
-| GaussianNB       |            25 |           30.1202 |           1.20481 |       0.0636075 |         3.67928 |
+| GradientBoosting |            25 |          505.834  |          20.2334  |       1.05452   |        72.9392  |
+| RandomForest     |            25 |          243.834  |           9.75334 |       0.480523  |        33.5889  |
+| QDA              |            25 |           49.7281 |           1.98913 |       0.0977607 |         6.65519 |
+| DecisionTree     |            25 |           46.6972 |           1.86789 |       0.079237  |         6.31694 |
+| LDA              |            25 |           45.0894 |           1.80358 |       0.105497  |         5.92905 |
+| GaussianNB       |            25 |           31.0172 |           1.24069 |       0.0626194 |         4.22831 |
 
 ### 3.3 Resumo Por Seletor
 | seletor      |   n_registros |   n_features |   tempo_total_sec |   tempo_medio_sec |   tempo_min_sec |   tempo_max_sec |
 |:-------------|--------------:|-------------:|------------------:|------------------:|----------------:|----------------:|
-| LowVariance  |            19 |           12 |          138.101  |           7.26846 |       0.0636075 |         66.8148 |
-| ExtraTrees   |            19 |           15 |          136.309  |           7.17416 |       0.0656469 |         66.7702 |
-| mRMR         |            19 |           15 |          135.925  |           7.15392 |       0.0655374 |         66.6386 |
-| LinearSVC_L1 |            19 |           15 |          135.739  |           7.14416 |       0.0658581 |         66.6723 |
-| LassoCV      |            19 |           15 |           91.2298 |           4.80157 |       0.0650917 |         39.4896 |
-| Pearson      |            19 |           15 |           90.6508 |           4.77109 |       0.06547   |         37.1969 |
-| Fisher       |            19 |           15 |           90.4652 |           4.76133 |       0.0651482 |         37.382  |
+| mRMR         |            19 |           15 |          146.331  |           7.70162 |       0.0645571 |         71.1579 |
+| ExtraTrees   |            19 |           15 |          144.265  |           7.59291 |       0.0641749 |         72.9392 |
+| LowVariance  |            19 |           12 |          133.834  |           7.04387 |       0.0641613 |         63.9786 |
+| LinearSVC_L1 |            19 |           15 |          132.466  |           6.97187 |       0.0636793 |         65.2278 |
+| LassoCV      |            19 |           15 |           94.3717 |           4.96693 |       0.0655679 |         39.2775 |
+| Pearson      |            19 |           15 |           89.0346 |           4.68603 |       0.0661193 |         37.4855 |
+| Fisher       |            19 |           15 |           88.6688 |           4.66678 |       0.0626194 |         37.5898 |
 
 ### 3.4 Etapas Mais Custosas
 | stage                            |   tempo_total_sec |   tempo_medio_sec |
 |:---------------------------------|------------------:|------------------:|
-| optuna_by_selector_optimization  |          703.956  |         16.7608   |
-| optuna_global_optimization       |          120.705  |         20.1175   |
-| feature_selection_selector_total |           49.3404 |          7.04863  |
-| feature_selection                |           42.1702 |          1.00405  |
-| optuna_by_selector_training      |           22.9531 |          0.546502 |
+| optuna_by_selector_optimization  |          717.064  |         17.0729   |
+| optuna_global_optimization       |          121.635  |         20.2725   |
+| feature_selection_selector_total |           47.7182 |          6.81689  |
+| feature_selection                |           40.6873 |          0.968745 |
+| optuna_by_selector_training      |           23.501  |          0.559548 |
 
 ## 4. Analise de Falsos Positivos e Falsos Negativos
 Para cada seletor de caracteristicas, foram geradas matrizes de confusao para todos os modelos e tambem para o melhor modelo do seletor.

@@ -1,0 +1,8 @@
+stage,seletor,modelo,status,error_message,n_features,n_trials,n_cv_folds,tempo_fit_sec,tempo_predict_sec,tempo_proba_sec,tempo_joblib_dump_sec,tempo_otimizacao_sec,tempo_total_sec,experiment_timestamp
+feature_selection_selector_total,LowVariance,,success,,12,,,,,,,,8.287275550999766,2026-05-04T21:17:02.080124
+feature_selection_selector_total,Pearson,,success,,15,,,,,,,,5.2680980099994485,2026-05-04T21:17:07.352844
+feature_selection_selector_total,Fisher,,success,,15,,,,,,,,5.272096035000686,2026-05-04T21:17:12.629249
+feature_selection_selector_total,mRMR,,success,,15,,,,,,,,8.29817432999971,2026-05-04T21:17:20.930657
+feature_selection_selector_total,LassoCV,,success,,15,,,,,,,,5.205320191000283,2026-05-04T21:17:26.141640
+feature_selection_selector_total,LinearSVC_L1,,success,,15,,,,,,,,8.511803706999672,2026-05-04T21:17:34.657191
+feature_selection_selector_total,ExtraTrees,,success,,15,,,,,,,,8.576703405999979,2026-05-04T21:17:43.238308
