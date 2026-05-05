@@ -1,0 +1,22 @@
+flowchart TD
+    A[Carregamento: DoS.csv] --> B[Limpeza e Tratamento]
+    B --> C[Split Train/Test e Scaler]
+    
+    subgraph Fase 1: Baseline e Seleção
+        C --> D[Treinar 6 Modelos Baseline\ncom TODAS as features]
+        C --> E[7 Seletores de Feature\nEx: Pearson, mRMR]
+        E --> F[Features de Consenso\nCruzamento dos 7 seletores]
+    end
+    
+    subgraph Fase 2: Ensemble Problemático
+        F --> G[Ensemble Soft Voting & Averaging]
+        D -. Usa pesos e probs dos baselines .-> G
+    end
+
+    subgraph Fase 3: Optuna
+        F --> H[Optuna Global\nOtimiza 6 modelos\ncom features consenso]
+        E --> I[Optuna por Seletor\nOtimiza 6x7 = 42 modelos]
+    end
+    
+    classDef red fill:#ffcccc,stroke:#ff0000,stroke-width:2px;
+    class G red;
