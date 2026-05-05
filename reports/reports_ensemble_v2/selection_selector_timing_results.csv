@@ -1,8 +1,8 @@
 stage,seletor,modelo,status,error_message,n_features,n_trials,n_cv_folds,tempo_fit_sec,tempo_predict_sec,tempo_proba_sec,tempo_joblib_dump_sec,tempo_otimizacao_sec,tempo_total_sec,experiment_timestamp
-feature_selection_selector_total,LowVariance,,success,,12,,,,,,,,8.287275550999766,2026-05-04T21:17:02.080124
-feature_selection_selector_total,Pearson,,success,,15,,,,,,,,5.2680980099994485,2026-05-04T21:17:07.352844
-feature_selection_selector_total,Fisher,,success,,15,,,,,,,,5.272096035000686,2026-05-04T21:17:12.629249
-feature_selection_selector_total,mRMR,,success,,15,,,,,,,,8.29817432999971,2026-05-04T21:17:20.930657
-feature_selection_selector_total,LassoCV,,success,,15,,,,,,,,5.205320191000283,2026-05-04T21:17:26.141640
-feature_selection_selector_total,LinearSVC_L1,,success,,15,,,,,,,,8.511803706999672,2026-05-04T21:17:34.657191
-feature_selection_selector_total,ExtraTrees,,success,,15,,,,,,,,8.576703405999979,2026-05-04T21:17:43.238308
+feature_selection_selector_total,LowVariance,,success,,12,,,,,,,,8.589781135000521,2026-05-04T22:01:32.200689
+feature_selection_selector_total,Pearson,,success,,15,,,,,,,,5.382079176000843,2026-05-04T22:01:37.586305
+feature_selection_selector_total,Fisher,,success,,15,,,,,,,,5.25725814100042,2026-05-04T22:01:42.846996
+feature_selection_selector_total,mRMR,,success,,15,,,,,,,,8.250168743999893,2026-05-04T22:01:51.100676
+feature_selection_selector_total,LassoCV,,success,,15,,,,,,,,5.119136782999703,2026-05-04T22:01:56.223331
+feature_selection_selector_total,LinearSVC_L1,,success,,15,,,,,,,,8.198276681001516,2026-05-04T22:02:04.425648
+feature_selection_selector_total,ExtraTrees,,success,,15,,,,,,,,8.34073250199981,2026-05-04T22:02:12.769769
