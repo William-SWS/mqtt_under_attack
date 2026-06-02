@@ -214,13 +214,13 @@
       }
     },
     "GaussianNB": {
-      "best_f1_cv": 0.9252819497308319,
+      "best_f1_cv": 0.9256490161047118,
       "best_params": {
-        "var_smoothing": 6.351221010640695e-06
+        "var_smoothing": 6.796578090758157e-07
       }
     },
     "DecisionTree": {
-      "best_f1_cv": 0.9668447279815439,
+      "best_f1_cv": 0.9668581236688607,
       "best_params": {
         "max_depth": 7,
         "min_samples_split": 33,
@@ -229,7 +229,7 @@
       }
     },
     "RandomForest": {
-      "best_f1_cv": 0.9668315333991613,
+      "best_f1_cv": 0.966659095302227,
       "best_params": {
         "n_estimators": 274,
         "max_depth": 10,

@@ -6,7 +6,7 @@ Este plano de tarefas descreve as modificações necessárias no notebook para e
 
 ## 1. Modificações no Jupyter Notebook `notebooks_refactored/03_pipeline_05_05.ipynb`
 
-### [ ] Inserir Lógica de Salvamento no Loop do Optuna por Seletor
+### [x] Inserir Lógica de Salvamento no Loop do Optuna por Seletor
 No loop principal de otimização dos modelos por seletor (onde os modelos são treinados e avaliados), insira a lógica para extrair e exportar os conjuntos de dados em formato CSV.
 
 **Código a ser injetado:**

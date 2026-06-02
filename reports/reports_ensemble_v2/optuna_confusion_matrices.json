@@ -41,12 +41,12 @@
   ],
   "RandomForest (Optuna)": [
     [
-      8652,
-      451
+      8648,
+      455
     ],
     [
-      59,
-      9763
+      52,
+      9770
     ]
   ],
   "GradientBoosting (Optuna)": [
