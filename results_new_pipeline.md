@@ -46,3 +46,19 @@ Os caminhos base destes arquivos são a pasta: `models/models_ensemble_v2/optuna
 | `optuna_by_selector_lowvariance_randomforest.pkl` | **2418.87 KB** (~2.4 MB) | **3.41 s** | Mais pesado na RAM, mas permite `n_jobs=-1` (multiprocessing no Pi). |
 | `optuna_by_selector_extratrees_gradientboosting.pkl` | **993.99 KB** | **10.73 s** | Usa 15 features. Deve ser usado para comparar e estressar o hardware em relação ao LowVariance. |
 | `optuna_by_selector_lowvariance_lda.pkl` | **1.95 KB** | **0.11 s** | Arquivo quase inexistente em tamanho. Útil se a placa estiver sob estresse térmico/processamento crítico e perder acerto não for o problema primário. |
+
+---
+
+## 3. Mapeamento de Datasets de Treino e Teste para Inferência (Deploy)
+
+Para realizar inferência ou validar os modelos no Raspberry Pi, os respectivos datasets de treino e teste são salvos na pasta `data/inference/` (divididos em `train/` e `test/`).
+
+A tabela abaixo relaciona cada modelo de deploy com seus respectivos datasets de treino e teste. Os datasets de teste destacados em **negrito** devem ser usados para a validação/inferência de cada modelo específico no Raspberry Pi:
+
+| Modelo pkl para Deploy | Dataset de Treino (em `data/inference/train/`) | Dataset de Teste (em `data/inference/test/`) | Requer Scaling? |
+| :--- | :--- | :--- | :--- |
+| `optuna_by_selector_lowvariance_gradientboosting.pkl` | `train_optuna_by_selector_lowvariance_gradientboosting.csv` | **`test_optuna_by_selector_lowvariance_gradientboosting.csv`** | Não |
+| `optuna_by_selector_lowvariance_decisiontree.pkl` | `train_optuna_by_selector_lowvariance_decisiontree.csv` | **`test_optuna_by_selector_lowvariance_decisiontree.csv`** | Não |
+| `optuna_by_selector_lowvariance_randomforest.pkl` | `train_optuna_by_selector_lowvariance_randomforest.csv` | **`test_optuna_by_selector_lowvariance_randomforest.csv`** | Não |
+| `optuna_by_selector_extratrees_gradientboosting.pkl` | `train_optuna_by_selector_extratrees_gradientboosting.csv` | **`test_optuna_by_selector_extratrees_gradientboosting.csv`** | Não |
+| `optuna_by_selector_lowvariance_lda.pkl` | `train_optuna_by_selector_lowvariance_lda.csv` | **`test_optuna_by_selector_lowvariance_lda.csv`** | Sim (já escalado) |
