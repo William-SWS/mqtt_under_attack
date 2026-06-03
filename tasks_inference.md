@@ -53,7 +53,7 @@ joblib.dump(tuned_model, model_path_refactored)
 
 ## 2. Execução e Geração dos Arquivos
 
-### [ ] Executar o Notebook `notebooks_refactored/03_pipeline_05_05.ipynb`
+### [x] Executar o Notebook `notebooks_refactored/03_pipeline_05_05.ipynb`
 - Abra o notebook no ambiente Jupyter.
 - Execute a opção **"Restart Kernel and Run All Cells"** para executar todo o pipeline de ML e processar as 42 combinações.
 - Confirme que os arquivos CSV foram criados e salvos corretamente nas pastas:
@@ -64,7 +64,7 @@ joblib.dump(tuned_model, model_path_refactored)
 
 ## 3. Validação dos Artefatos de Inferência
 
-### [ ] Verificar a Integridade dos Datasets
-- [ ] Validar se a quantidade de linhas em cada dataset de teste exportado é exatamente 18.925.
-- [ ] Validar se as colunas correspondem às features selecionadas pelo respectivo seletor mais a coluna de label `type`.
-- [ ] Validar se os valores das features para o modelo `LDA` estão devidamente escalados (StandardScaler aplicado).
+### [x] Verificar a Integridade dos Datasets
+- [x] Validar se a quantidade de linhas em cada dataset de teste exportado é exatamente 18.925.
+- [x] Validar se as colunas correspondem às features selecionadas pelo respectivo seletor mais a coluna de label `type`.
+- [x] Validar se os valores das features para o modelo `LDA` estão devidamente escalados (StandardScaler aplicado).
