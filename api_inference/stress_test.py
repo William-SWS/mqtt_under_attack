@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import math
 import os
 import statistics
 import time
@@ -67,7 +68,7 @@ class StressResult:
 
         aggregated: dict[str, dict] = {}
         for model_id, runs in sorted(by_model.items()):
-            times = [r["inference_time_sec"] for r in runs if r.get("inference_time_sec") is not None]
+            times = [r["inference_time_sec"] * 1000 for r in runs if r.get("inference_time_sec") is not None]
             accs = [r["accuracy"] for r in runs if r.get("accuracy") is not None]
             rows_set = {r["rows"] for r in runs if r.get("rows") is not None}
             n_feat_set = {r["n_features"] for r in runs if r.get("n_features") is not None}
@@ -79,12 +80,20 @@ class StressResult:
             }
 
             if times:
+                avg = statistics.mean(times)
+                std = statistics.stdev(times) if len(times) > 1 else 0.0
+                n = len(times)
+                se = std / math.sqrt(n)
+                z = 1.96
                 base.update({
-                    "inference_time_sec_avg": round(statistics.mean(times), 4),
-                    "inference_time_sec_min": round(min(times), 4),
-                    "inference_time_sec_max": round(max(times), 4),
-                    "inference_time_sec_p50": round(statistics.median(times), 4),
-                    "inference_times_sec": [round(t, 4) for t in times],
+                    "inference_time_ms_avg": round(avg, 3),
+                    "inference_time_ms_std": round(std, 3),
+                    "inference_time_ms_min": round(min(times), 3),
+                    "inference_time_ms_max": round(max(times), 3),
+                    "inference_time_ms_p50": round(statistics.median(times), 3),
+                    "inference_time_ms_ci95_lower": round(avg - z * se, 3),
+                    "inference_time_ms_ci95_upper": round(avg + z * se, 3),
+                    "inference_times_ms": [round(t, 3) for t in times],
                 })
             if accs:
                 base.update({
@@ -126,12 +135,18 @@ class StressResult:
         if aggregated:
             lines.extend(["", "--- Per Model ---"])
             for model_id, agg in aggregated.items():
-                if "inference_time_sec_avg" in agg:
+                if "inference_time_ms_avg" in agg:
+                    ci = agg.get("inference_time_ms_ci95_lower")
+                    if ci is not None:
+                        ci_str = f"ci95=[{agg['inference_time_ms_ci95_lower']:.1f}, {agg['inference_time_ms_ci95_upper']:.1f}]ms"
+                    else:
+                        ci_str = ""
                     lines.append(
                         f"  {model_id}: {agg['requests']}x  "
-                        f"avg={agg['inference_time_sec_avg']:.4f}s  "
-                        f"min={agg['inference_time_sec_min']:.4f}s  "
-                        f"max={agg['inference_time_sec_max']:.4f}s  "
+                        f"avg={agg['inference_time_ms_avg']:.1f}ms  "
+                        f"p50={agg['inference_time_ms_p50']:.1f}ms  "
+                        f"std={agg.get('inference_time_ms_std', '?'):.1f}ms  "
+                        f"{ci_str}  "
                         f"acc={agg.get('accuracy_avg', 'N/A')}"
                     )
 
