@@ -351,9 +351,9 @@ pip install numpy pandas scikit-learn joblib paho-mqtt
 Exemplo (na sua máquina):
 
 ```bash
-ssh pi@<IP_DO_RASPBERRY> "mkdir -p ~/mqtt_infer/models"
-scp models/models_ensemble_v2/optuna/optuna_by_selector_extratrees_gradientboosting.pkl pi@<IP_DO_RASPBERRY>:~/mqtt_infer/models/
-scp scripts/pi_inference.py pi@<IP_DO_RASPBERRY>:~/mqtt_infer/
+ssh pi@192.168.20.83 "mkdir -p ~/mqtt_infer/models"
+scp models/models_ensemble_v2/optuna/optuna_by_selector_extratrees_gradientboosting.pkl pi@192.168.20.83:~/mqtt_infer/models/
+scp scripts/pi_inference.py pi@192.168.20.83:~/mqtt_infer/
 ```
 
 3. Executar inferência no Pi:

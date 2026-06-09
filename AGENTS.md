@@ -219,8 +219,8 @@ python main.py  # Orquestra: data_loader.py → train.py → evaluate.py
 ```bash
 # Da máquina local:
 scp models/models_ensemble_v2/optuna/optuna_by_selector_lowvariance_gradientboosting.pkl \
-    pi@<IP>:~/mqtt_infer/models/
-scp scripts/pi_inference.py pi@<IP>:~/mqtt_infer/
+    pi@192.168.20.83:~/mqtt_infer/models/
+scp scripts/pi_inference.py pi@192.168.20.83:~/mqtt_infer/
 
 # No Raspberry Pi:
 source ~/mqtt_env/bin/activate

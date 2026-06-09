@@ -332,13 +332,13 @@ docker run --rm hello-world
 Na maquina local, a partir da raiz do repositorio:
 
 ```bash
-rsync -av api_inference/ pi@<IP_DO_RASPBERRY>:~/api_inference/
+rsync -av api_inference/ pi@192.168.20.83:~/api_inference/
 ```
 
 Se preferir `scp`:
 
 ```bash
-scp -r api_inference pi@<IP_DO_RASPBERRY>:~/
+scp -r api_inference pi@192.168.20.83:~/
 ```
 
 #### 4. Conferir modelos e datasets no Raspberry Pi
@@ -391,7 +391,7 @@ docker compose logs -f
 A API fica disponivel em:
 
 ```text
-http://<IP_DO_RASPBERRY>:8000
+http://192.168.20.83:8000
 ```
 
 Se a porta `8000` ja estiver em uso, altere o mapeamento no
@@ -413,24 +413,24 @@ docker compose up -d
 No Raspberry Pi ou em outra maquina na mesma rede:
 
 ```bash
-curl http://<IP_DO_RASPBERRY>:8000/health
-curl http://<IP_DO_RASPBERRY>:8000/models
+curl http://192.168.20.83:8000/health
+curl http://192.168.20.83:8000/models
 ```
 
 Para executar o benchmark completo:
 
 ```bash
-curl -X POST http://<IP_DO_RASPBERRY>:8000/benchmark
+curl -X POST http://192.168.20.83:8000/benchmark
 ```
 
 Para executar apenas um modelo:
 
 ```bash
-curl -X POST http://<IP_DO_RASPBERRY>:8000/benchmark/lowvariance_gradientboosting
-curl -X POST http://<IP_DO_RASPBERRY>:8000/benchmark/lowvariance_decisiontree
-curl -X POST http://<IP_DO_RASPBERRY>:8000/benchmark/lowvariance_randomforest
-curl -X POST http://<IP_DO_RASPBERRY>:8000/benchmark/extratrees_gradientboosting
-curl -X POST http://<IP_DO_RASPBERRY>:8000/benchmark/lowvariance_lda
+curl -X POST http://192.168.20.83:8000/benchmark/lowvariance_gradientboosting
+curl -X POST http://192.168.20.83:8000/benchmark/lowvariance_decisiontree
+curl -X POST http://192.168.20.83:8000/benchmark/lowvariance_randomforest
+curl -X POST http://192.168.20.83:8000/benchmark/extratrees_gradientboosting
+curl -X POST http://192.168.20.83:8000/benchmark/lowvariance_lda
 ```
 
 #### 8. Conferir o CSV de resultados
@@ -450,7 +450,7 @@ cat results_inference/iinference.csv
 Para copiar o CSV de volta para a maquina local:
 
 ```bash
-scp pi@<IP_DO_RASPBERRY>:~/api_inference/results_inference/iinference.csv .
+scp pi@192.168.20.83:~/api_inference/results_inference/iinference.csv .
 ```
 
 #### 9. Parar a API
