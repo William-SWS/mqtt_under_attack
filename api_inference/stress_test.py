@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import json
+import os
 import statistics
 import time
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
+from datetime import UTC, datetime
 from typing import Any
 
 import httpx
@@ -80,6 +83,47 @@ P95:              {self.p95_ms:.1f}
 P99:              {self.p99_ms:.1f}
 """
 
+    def to_dict(self, args: argparse.Namespace, system_before: dict | None, system_after: dict | None) -> dict:
+        return {
+            "test_info": {
+                "timestamp": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "url": args.url,
+                "endpoint": args.endpoint,
+                "method": "POST" if args.endpoint.startswith("/benchmark") else "GET",
+                "concurrency": args.concurrency,
+                "requests": args.requests,
+                "timeout_sec": args.timeout,
+                "duration_sec": round(self.total_duration_sec, 3),
+            },
+            "results": {
+                "successful": self.successful,
+                "failed": self.failed,
+                "timeouts": self.timeouts,
+                "error_rate_pct": round((self.failed / max(self.total_requests, 1)) * 100, 2),
+                "throughput_req_per_sec": round(self.throughput, 2),
+            },
+            "latency_ms": {
+                "average": round(self.avg_latency_ms, 2),
+                "min": round(self.min_ms, 2),
+                "max": round(self.max_ms, 2),
+                "p50": round(self.p50_ms, 2),
+                "p95": round(self.p95_ms, 2),
+                "p99": round(self.p99_ms, 2),
+                "all": [round(lat, 3) for lat in self.latencies_ms],
+            },
+            "system_before": system_before,
+            "system_after": system_after,
+        }
+
+
+async def fetch_system_stats(client: httpx.AsyncClient, url: str) -> dict | None:
+    try:
+        resp = await client.get(f"{url}/stats", timeout=10.0)
+        resp.raise_for_status()
+        return resp.json()
+    except Exception:
+        return None
+
 
 async def send_request(
     client: httpx.AsyncClient,
@@ -141,6 +185,18 @@ async def run_stress_test(
     )
 
 
+def save_result(result: StressResult, args: argparse.Namespace, output_dir: str,
+                 system_before: dict | None, system_after: dict | None) -> str:
+    os.makedirs(output_dir, exist_ok=True)
+    timestamp = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
+    filename = f"stress_test_{timestamp}.json"
+    filepath = os.path.join(output_dir, filename)
+    data = result.to_dict(args, system_before, system_after)
+    with open(filepath, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+    return filepath
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Stress test for MQTT Under Attack Inference API"
@@ -174,6 +230,11 @@ def main() -> None:
         default=300.0,
         help="Request timeout in seconds (default: 300)",
     )
+    parser.add_argument(
+        "--output-dir",
+        default="results_inference",
+        help="Directory to save JSON results (default: results_inference)",
+    )
 
     args = parser.parse_args()
     method = "POST" if args.endpoint.startswith("/benchmark") else "GET"
@@ -186,8 +247,18 @@ def main() -> None:
     print(f"  Timeout:     {args.timeout}s")
     print()
 
-    result = asyncio.run(
-        run_stress_test(
+    async def run() -> None:
+        async with httpx.AsyncClient() as client:
+            system_before = await fetch_system_stats(client, args.url)
+            if system_before:
+                mem = system_before.get("memory_used_mb")
+                cpu = system_before.get("cpu_count")
+                workers = system_before.get("uvicorn_workers")
+                print(f"  System stats (before):")
+                print(f"    Workers: {workers}  |  CPU cores: {cpu}  |  RAM used: {mem} MB")
+                print()
+
+        result = await run_stress_test(
             url=args.url,
             endpoint=args.endpoint,
             method=method,
@@ -195,8 +266,16 @@ def main() -> None:
             requests=args.requests,
             timeout=args.timeout,
         )
-    )
-    print(result.summary())
+
+        async with httpx.AsyncClient() as client:
+            system_after = await fetch_system_stats(client, args.url)
+
+        print(result.summary())
+
+        filepath = save_result(result, args, args.output_dir, system_before, system_after)
+        print(f"JSON saved: {filepath}")
+
+    asyncio.run(run())
 
 
 if __name__ == "__main__":

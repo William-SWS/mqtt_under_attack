@@ -11,6 +11,7 @@ from app.benchmark import (
     public_result,
     run_all_benchmarks,
     run_benchmark,
+    system_stats,
     update_single_result,
     write_results,
 )
@@ -48,6 +49,11 @@ async def benchmark_all() -> dict:
         "results_csv": str(csv_path),
         "results": [public_result(result) for result in results],
     }
+
+
+@app.get("/stats")
+async def stats() -> dict:
+    return await asyncio.to_thread(system_stats)
 
 
 @app.post("/benchmark/{model_id}")

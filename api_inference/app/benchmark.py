@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
+import concurrent.futures
 import os
 import time
 from typing import Any
@@ -318,3 +319,40 @@ def public_model_info(paths: Paths | None = None) -> list[dict[str, Any]]:
 
 def public_result(result: BenchmarkResult) -> dict[str, Any]:
     return asdict(result)
+
+
+def system_stats() -> dict[str, Any]:
+    mem_total = None
+    mem_available = None
+    try:
+        with open("/proc/meminfo") as f:
+            for line in f:
+                if line.startswith("MemTotal:"):
+                    mem_total = int(line.split()[1]) // 1024
+                elif line.startswith("MemAvailable:"):
+                    mem_available = int(line.split()[1]) // 1024
+    except FileNotFoundError:
+        pass
+
+    cpu_count = os.cpu_count() or 1
+    thread_pool_max = min(32, cpu_count + 4)
+    uvicorn_workers = int(os.getenv("UVICORN_WORKERS", "4"))
+
+    try:
+        load_avg = os.getloadavg()
+    except OSError:
+        load_avg = (None, None, None)
+
+    mem_used = mem_total - mem_available if mem_total is not None and mem_available is not None else None
+
+    return {
+        "uvicorn_workers": uvicorn_workers,
+        "cpu_count": cpu_count,
+        "thread_pool_max_workers": thread_pool_max,
+        "memory_total_mb": mem_total,
+        "memory_used_mb": mem_used,
+        "memory_available_mb": mem_available,
+        "load_avg_1min": round(load_avg[0], 2) if load_avg[0] is not None else None,
+        "load_avg_5min": round(load_avg[1], 2) if load_avg[1] is not None else None,
+        "load_avg_15min": round(load_avg[2], 2) if load_avg[2] is not None else None,
+    }
