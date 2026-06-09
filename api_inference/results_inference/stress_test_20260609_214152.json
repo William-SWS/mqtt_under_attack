@@ -1,0 +1,71 @@
+{
+  "test_info": {
+    "timestamp": "2026-06-09T21:41:52Z",
+    "url": "http://192.168.20.83:8000",
+    "endpoint": "/benchmark",
+    "method": "POST",
+    "concurrency": 5,
+    "requests": 20,
+    "timeout_sec": 600.0,
+    "duration_sec": 42.163
+  },
+  "results": {
+    "successful": 20,
+    "failed": 0,
+    "timeouts": 0,
+    "error_rate_pct": 0.0,
+    "throughput_req_per_sec": 0.47
+  },
+  "latency_ms": {
+    "average": 9735.03,
+    "min": 5654.92,
+    "max": 19859.99,
+    "p50": 7043.82,
+    "p95": 19859.99,
+    "p99": 19859.99,
+    "all": [
+      13065.189,
+      13170.052,
+      13319.177,
+      6471.692,
+      19642.353,
+      6609.365,
+      19859.991,
+      7142.122,
+      6277.336,
+      6353.491,
+      6655.652,
+      6592.413,
+      6665.575,
+      12990.318,
+      13208.723,
+      6945.514,
+      5733.809,
+      5654.916,
+      9031.872,
+      9310.962
+    ]
+  },
+  "system_before": {
+    "uvicorn_workers": 4,
+    "cpu_count": 4,
+    "thread_pool_max_workers": 8,
+    "memory_total_mb": 3795,
+    "memory_used_mb": 2648,
+    "memory_available_mb": 1147,
+    "load_avg_1min": 0.0,
+    "load_avg_5min": 0.02,
+    "load_avg_15min": 0.01
+  },
+  "system_after": {
+    "uvicorn_workers": 4,
+    "cpu_count": 4,
+    "thread_pool_max_workers": 8,
+    "memory_total_mb": 3795,
+    "memory_used_mb": 2915,
+    "memory_available_mb": 880,
+    "load_avg_1min": 2.15,
+    "load_avg_5min": 0.6,
+    "load_avg_15min": 0.21
+  }
+}
