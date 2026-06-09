@@ -6,7 +6,8 @@ import json
 import os
 import statistics
 import time
-from dataclasses import asdict, dataclass, field
+from collections import defaultdict
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
@@ -21,6 +22,7 @@ class StressResult:
     timeouts: int
     total_duration_sec: float
     latencies_ms: list[float] = field(default_factory=list)
+    model_runs: list[dict[str, Any]] = field(default_factory=list)
 
     @property
     def throughput(self) -> float:
@@ -58,33 +60,85 @@ class StressResult:
     def max_ms(self) -> float:
         return max(self.latencies_ms) if self.latencies_ms else 0.0
 
+    def _aggregate_models(self) -> dict[str, dict[str, Any]]:
+        by_model: dict[str, list[dict]] = defaultdict(list)
+        for run in self.model_runs:
+            by_model[run["model_id"]].append(run)
+
+        aggregated: dict[str, dict] = {}
+        for model_id, runs in sorted(by_model.items()):
+            times = [r["inference_time_sec"] for r in runs if r.get("inference_time_sec") is not None]
+            accs = [r["accuracy"] for r in runs if r.get("accuracy") is not None]
+            rows_set = {r["rows"] for r in runs if r.get("rows") is not None}
+            n_feat_set = {r["n_features"] for r in runs if r.get("n_features") is not None}
+
+            base = {
+                "requests": len(runs),
+                "rows": rows_set.pop() if len(rows_set) == 1 else list(rows_set),
+                "n_features": n_feat_set.pop() if len(n_feat_set) == 1 else list(n_feat_set),
+            }
+
+            if times:
+                base.update({
+                    "inference_time_sec_avg": round(statistics.mean(times), 4),
+                    "inference_time_sec_min": round(min(times), 4),
+                    "inference_time_sec_max": round(max(times), 4),
+                    "inference_time_sec_p50": round(statistics.median(times), 4),
+                    "inference_times_sec": [round(t, 4) for t in times],
+                })
+            if accs:
+                base.update({
+                    "accuracy_avg": round(statistics.mean(accs), 4),
+                    "accuracy_min": round(min(accs), 4),
+                    "accuracy_max": round(max(accs), 4),
+                    "accuracies": [round(a, 4) for a in accs],
+                })
+
+            aggregated[model_id] = base
+
+        return aggregated
+
     def summary(self) -> str:
-        return f"""
-=== Stress Test Results ===
-Target URL:       {self.total_requests} requests
-Concurrency:      {self.successful + self.failed} total
-Total duration:   {self.total_duration_sec:.2f}s
+        lines = [
+            "",
+            "=== Stress Test Results ===",
+            f"Total duration:   {self.total_duration_sec:.2f}s",
+            "",
+            "--- Results ---",
+            f"Successful:       {self.successful}",
+            f"Failed:           {self.failed}",
+            f"Timeouts:         {self.timeouts}",
+            f"Error rate:       {(self.failed / max(self.total_requests, 1)) * 100:.1f}%",
+            "",
+            "--- Throughput ---",
+            f"Requests/sec:     {self.throughput:.1f}",
+            "",
+            "--- Latency (ms) ---",
+            f"Average:          {self.avg_latency_ms:.1f}",
+            f"Min:              {self.min_ms:.1f}",
+            f"Max:              {self.max_ms:.1f}",
+            f"P50 (median):     {self.p50_ms:.1f}",
+            f"P95:              {self.p95_ms:.1f}",
+            f"P99:              {self.p99_ms:.1f}",
+        ]
 
---- Results ---
-Successful:       {self.successful}
-Failed:           {self.failed}
-Timeouts:         {self.timeouts}
-Error rate:       {(self.failed / max(self.total_requests, 1)) * 100:.1f}%
+        aggregated = self._aggregate_models()
+        if aggregated:
+            lines.extend(["", "--- Per Model ---"])
+            for model_id, agg in aggregated.items():
+                if "inference_time_sec_avg" in agg:
+                    lines.append(
+                        f"  {model_id}: {agg['requests']}x  "
+                        f"avg={agg['inference_time_sec_avg']:.4f}s  "
+                        f"min={agg['inference_time_sec_min']:.4f}s  "
+                        f"max={agg['inference_time_sec_max']:.4f}s  "
+                        f"acc={agg.get('accuracy_avg', 'N/A')}"
+                    )
 
---- Throughput ---
-Requests/sec:     {self.throughput:.1f}
-
---- Latency (ms) ---
-Average:          {self.avg_latency_ms:.1f}
-Min:              {self.min_ms:.1f}
-Max:              {self.max_ms:.1f}
-P50 (median):     {self.p50_ms:.1f}
-P95:              {self.p95_ms:.1f}
-P99:              {self.p99_ms:.1f}
-"""
+        return "\n".join(lines)
 
     def to_dict(self, args: argparse.Namespace, system_before: dict | None, system_after: dict | None) -> dict:
-        return {
+        d = {
             "test_info": {
                 "timestamp": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "url": args.url,
@@ -115,6 +169,12 @@ P99:              {self.p99_ms:.1f}
             "system_after": system_after,
         }
 
+        aggregated = self._aggregate_models()
+        if aggregated:
+            d["per_model"] = aggregated
+
+        return d
+
 
 async def fetch_system_stats(client: httpx.AsyncClient, url: str) -> dict | None:
     try:
@@ -125,24 +185,42 @@ async def fetch_system_stats(client: httpx.AsyncClient, url: str) -> dict | None
         return None
 
 
+def _extract_model_runs(body: dict[str, Any] | None) -> list[dict[str, Any]]:
+    if body is None:
+        return []
+    if "results" in body:
+        return body["results"]
+    if "result" in body:
+        return [body["result"]]
+    return []
+
+
 async def send_request(
     client: httpx.AsyncClient,
     url: str,
     method: str,
     timeout: float,
     semaphore: asyncio.Semaphore,
-    results: list[float],
+    latencies: list[float],
+    model_runs: list[dict[str, Any]],
     errors: list[str],
 ) -> None:
     async with semaphore:
         try:
             start = time.perf_counter()
             if method == "POST":
-                await client.post(url, timeout=timeout)
+                resp = await client.post(url, timeout=timeout)
             else:
-                await client.get(url, timeout=timeout)
+                resp = await client.get(url, timeout=timeout)
             elapsed = (time.perf_counter() - start) * 1000
-            results.append(elapsed)
+            latencies.append(elapsed)
+
+            body = resp.json() if resp.status_code == 200 and resp.text else None
+            runs = _extract_model_runs(body)
+            for run in runs:
+                run["_request_latency_ms"] = round(elapsed, 3)
+            model_runs.extend(runs)
+
         except httpx.TimeoutException:
             errors.append("timeout")
         except Exception as exc:
@@ -159,13 +237,14 @@ async def run_stress_test(
 ) -> StressResult:
     full_url = f"{url}{endpoint}"
     latencies: list[float] = []
+    model_runs: list[dict[str, Any]] = []
     errors: list[str] = []
     semaphore = asyncio.Semaphore(concurrency)
 
     async with httpx.AsyncClient() as client:
         start = time.perf_counter()
         tasks = [
-            send_request(client, full_url, method, timeout, semaphore, latencies, errors)
+            send_request(client, full_url, method, timeout, semaphore, latencies, model_runs, errors)
             for _ in range(requests)
         ]
         await asyncio.gather(*tasks)
@@ -182,6 +261,7 @@ async def run_stress_test(
         timeouts=timeouts,
         total_duration_sec=total_duration,
         latencies_ms=latencies,
+        model_runs=model_runs,
     )
 
 
@@ -239,7 +319,7 @@ def main() -> None:
     args = parser.parse_args()
     method = "POST" if args.endpoint.startswith("/benchmark") else "GET"
 
-    print(f"Starting stress test...")
+    print("Starting stress test...")
     print(f"  URL:         {args.url}{args.endpoint}")
     print(f"  Method:      {method}")
     print(f"  Concurrency: {args.concurrency}")
@@ -254,7 +334,7 @@ def main() -> None:
                 mem = system_before.get("memory_used_mb")
                 cpu = system_before.get("cpu_count")
                 workers = system_before.get("uvicorn_workers")
-                print(f"  System stats (before):")
+                print("  System stats (before):")
                 print(f"    Workers: {workers}  |  CPU cores: {cpu}  |  RAM used: {mem} MB")
                 print()
 
@@ -273,7 +353,7 @@ def main() -> None:
         print(result.summary())
 
         filepath = save_result(result, args, args.output_dir, system_before, system_after)
-        print(f"JSON saved: {filepath}")
+        print(f"\nJSON saved: {filepath}")
 
     asyncio.run(run())
 
