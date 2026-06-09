@@ -11,3 +11,4 @@ services:
       - ./results_inference:/app/results_inference
     environment:
       API_INFERENCE_ROOT: /app
+      UVICORN_WORKERS: 4

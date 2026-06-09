@@ -1,6 +1,6 @@
 # MQTT Inference Benchmark API
 
-API HTTP simples para medir tempo de inferencia dos modelos treinados do pipeline
+API HTTP assíncrona para medir tempo de inferencia dos modelos treinados do pipeline
 `03_pipeline_05_05.ipynb`.
 
 ## Estrutura
@@ -42,11 +42,15 @@ Este arquivo define a aplicacao FastAPI e os endpoints HTTP expostos para o
 usuario. Nenhum endpoint exige autenticacao ou corpo JSON.
 
 | Metodo | Rota | Entrada | Retorno esperado |
-|---|---|---|---|
+|---|---|---|---|---|
 | `health()` | `GET /health` | Nenhuma. | Dicionario com `status`, caminhos configurados e flags indicando se `models/`, `datasets/test/` e `results_inference/` existem. |
 | `models()` | `GET /models` | Nenhuma. | Dicionario com `count`, `compatible_count` e `models`, onde cada item descreve um modelo, dataset pareado, quantidade de features, linhas e compatibilidade. |
 | `benchmark_all()` | `POST /benchmark` | Nenhuma. | Executa todos os modelos compativeis, sobrescreve `results_inference/iinference.csv` e retorna `count`, `results_csv` e a lista `results`. |
 | `benchmark_one(model_id)` | `POST /benchmark/{model_id}` | `model_id` no path, exemplo: `lowvariance_gradientboosting`. | Executa um unico modelo, atualiza o CSV preservando os outros resultados e retorna `results_csv` e `result`. Se o modelo nao existir ou estiver incompativel, retorna HTTP `404` com detalhes do erro. |
+
+> Todos os endpoints sao assincronos (`async def`). Operacoes CPU-bound
+> rodam na thread pool via `asyncio.to_thread()`, permitindo que o event
+> loop atenda outras requisicoes durante inferencias longas.
 
 Exemplo de resposta resumida de `POST /benchmark/{model_id}`:
 
@@ -153,8 +157,11 @@ cd api_inference
 python -m venv .venv
 . .venv/bin/activate
 pip install -r requirements.txt
-uvicorn app.main:app --host 0.0.0.0 --port 8000
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
 ```
+
+> Dica: Ajuste `--workers` para o numero de CPUs da maquina. Em ambiente Docker,
+> a variavel `UVICORN_WORKERS` controla esse valor.
 
 Em outro terminal:
 
@@ -174,6 +181,104 @@ docker compose up
 
 O `docker-compose.yml` monta os modelos e datasets como leitura e permite escrita
 em `results_inference/`.
+
+## Stress Test
+
+O script `stress_test.py` simula multiplas requisicoes concorrentes de uma
+maquina remota, ideal para validar o comportamento da API sob carga.
+
+### Requisito
+
+```bash
+pip install httpx
+```
+
+(ja incluido no `requirements.txt`)
+
+### Uso basico
+
+Testar o endpoint `/health` com 10 requisicoes simultaneas:
+
+```bash
+python stress_test.py --url http://localhost:8000 --endpoint /health --concurrency 10 --requests 100
+```
+
+### Opcoes
+
+| Argumento | Padrao | Descricao |
+|---|---|---|
+| `--url` | `http://localhost:8000` | URL base da API |
+| `--endpoint` | `/health` | Caminho do endpoint: `/health`, `/models`, `/benchmark` ou `/benchmark/lowvariance_gradientboosting` |
+| `-c` / `--concurrency` | `10` | Numero de requisicoes simultaneas |
+| `-n` / `--requests` | `100` | Total de requisicoes a enviar |
+| `-t` / `--timeout` | `300` | Timeout por requisicao em segundos (modelos podem demorar) |
+
+### Exemplos
+
+Teste rapido de health check com 50 requisicoes concorrentes:
+
+```bash
+python stress_test.py --endpoint /health --concurrency 50 --requests 500
+```
+
+Teste de benchmark com 5 requisicoes simultaneas (cada uma roda todos os modelos):
+
+```bash
+python stress_test.py --endpoint /benchmark --concurrency 5 --requests 20 --timeout 600
+```
+
+De outra maquina na mesma rede:
+
+```bash
+python stress_test.py --url http://192.168.1.100:8000 --endpoint /models --concurrency 20 --requests 200
+```
+
+### Relatorio de saida
+
+O script exibe ao final:
+
+```
+=== Stress Test Results ===
+Target URL:       http://localhost:8000/health
+Concurrency:      100 total
+Total duration:   2.34s
+
+--- Results ---
+Successful:       100
+Failed:           0
+Timeouts:         0
+Error rate:       0.0%
+
+--- Throughput ---
+Requests/sec:     42.7
+
+--- Latency (ms) ---
+Average:          233.5
+Min:              45.2
+Max:              512.8
+P50 (median):     198.3
+P95:              481.2
+P99:              508.9
+```
+
+### Arquitetura assincrona e concorrencia
+
+A API usa FastAPI com `async def` em todos os endpoints. As operacoes
+CPU-bound (carregamento de modelo, inferencia, leitura de CSV) sao
+executadas na thread pool do Python via `asyncio.to_thread()`, liberando
+o event loop para atender outras requisicoes enquanto a inferencia roda.
+
+O Uvicorn pode ser executado com multiplos workers (`--workers N`), cada
+um em um processo separado, permitindo paralelismo real em maquinas
+multi-core. Cada worker tem sua propria thread pool e event loop.
+
+Para ambientes conteinerizados, a variavel `UVICORN_WORKERS` controla o
+numero de workers (padrao: 4). Ajuste conforme a CPU disponivel:
+
+```yaml
+environment:
+  UVICORN_WORKERS: 4
+```
 
 ## Raspberry Pi
 

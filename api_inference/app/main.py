@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import asyncio
+
 from fastapi import FastAPI, HTTPException
 
 from app.benchmark import (
@@ -17,18 +19,18 @@ from app.benchmark import (
 app = FastAPI(
     title="MQTT Under Attack Inference Benchmark API",
     description="Runs batch inference benchmarks for trained MQTT DoS models.",
-    version="1.0.0",
+    version="1.1.0",
 )
 
 
 @app.get("/health")
-def health() -> dict:
-    return health_status()
+async def health() -> dict:
+    return await asyncio.to_thread(health_status)
 
 
 @app.get("/models")
-def models() -> dict:
-    model_info = public_model_info()
+async def models() -> dict:
+    model_info = await asyncio.to_thread(public_model_info)
     return {
         "count": len(model_info),
         "compatible_count": sum(1 for model in model_info if model["compatible"]),
@@ -37,10 +39,10 @@ def models() -> dict:
 
 
 @app.post("/benchmark")
-def benchmark_all() -> dict:
+async def benchmark_all() -> dict:
     paths = get_paths()
-    results = run_all_benchmarks(paths)
-    csv_path = write_results(results, paths)
+    results = await asyncio.to_thread(run_all_benchmarks, paths)
+    csv_path = await asyncio.to_thread(write_results, results, paths)
     return {
         "count": len(results),
         "results_csv": str(csv_path),
@@ -49,12 +51,12 @@ def benchmark_all() -> dict:
 
 
 @app.post("/benchmark/{model_id}")
-def benchmark_one(model_id: str) -> dict:
+async def benchmark_one(model_id: str) -> dict:
     paths = get_paths()
-    result = run_benchmark(model_id, paths)
+    result = await asyncio.to_thread(run_benchmark, model_id, paths)
     if result.status != "success":
         raise HTTPException(status_code=404, detail=public_result(result))
-    csv_path = update_single_result(result, paths)
+    csv_path = await asyncio.to_thread(update_single_result, result, paths)
     return {
         "results_csv": str(csv_path),
         "result": public_result(result),
