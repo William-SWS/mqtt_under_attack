@@ -1,3 +1,15 @@
+"""
+Módulo principal de stress test para a API de inferência MQTT.
+
+Orquestra requisições HTTP concorrentes contra a API alvo (Raspberry Pi),
+coleta estatísticas de latência, agrega resultados por modelo e persiste
+em JSON com timestamp.
+
+Uso típico:
+    from stress_api.core import StressTestRequest, run_stress_test
+    result = await run_stress_test(StressTestRequest(target_url="http://192.168.20.83:8000"))
+"""
+
 from __future__ import annotations
 
 import asyncio
@@ -15,6 +27,20 @@ from pydantic import BaseModel, Field
 
 
 class StressTestRequest(BaseModel):
+    """Modelo Pydantic para os parâmetros do teste de estresse.
+
+    Attributes:
+        target_url: URL base da API alvo (ex: http://192.168.20.83:8000).
+        endpoint: Caminho do endpoint a ser testado.
+                  /benchmark executa todos os modelos compatíveis.
+                  /benchmark/{model_id} executa apenas um modelo.
+                  /health e /models são testes leves sem inferência.
+        concurrency: Número de requisições simultâneas (controla o semáforo asyncio).
+        requests: Total de requisições a enviar durante o teste.
+        timeout: Tempo máximo em segundos para aguardar cada requisição.
+        output_dir: Diretório relativo onde o JSON de resultados será salvo.
+    """
+
     target_url: str = Field(
         ..., description="URL base da API alvo (ex: http://192.168.20.83:8000)"
     )
@@ -31,6 +57,7 @@ class StressTestRequest(BaseModel):
 
     @property
     def method(self) -> str:
+        """Define o método HTTP baseado no endpoint."""
         return "POST" if self.endpoint.startswith("/benchmark") else "GET"
 
 
@@ -38,6 +65,12 @@ class StressTestRequest(BaseModel):
 
 
 def _extract_model_runs(body: dict[str, Any] | None) -> list[dict[str, Any]]:
+    """Extrai a lista de resultados de modelos do corpo da resposta da API.
+
+    A API /benchmark retorna {"results": [...]} (todos os modelos),
+    enquanto /benchmark/{model_id} retorna {"result": {...}} (um modelo).
+    Esta função normaliza ambos os formatos para uma lista.
+    """
     if body is None:
         return []
     if "results" in body:
@@ -50,12 +83,27 @@ def _extract_model_runs(body: dict[str, Any] | None) -> list[dict[str, Any]]:
 def _aggregate_model_stats(
     model_runs: list[dict[str, Any]],
 ) -> dict[str, dict[str, Any]]:
+    """Agrupa as execuções por model_id e calcula estatísticas agregadas.
+
+    Para cada modelo, calcula:
+    - Média, desvio padrão, mínimo, máximo e mediana (P50) dos tempos
+    - Intervalo de confiança de 95% (distribuição normal: z=1.96)
+    - Média, mínima e máxima da acurácia
+
+    Args:
+        model_runs: Lista plana de dicionários, cada um representando
+                    a execução de um modelo em uma requisição.
+
+    Returns:
+        Dicionário {model_id: {estatísticas}} pronto para serializar em JSON.
+    """
     by_model: dict[str, list[dict]] = defaultdict(list)
     for run in model_runs:
         by_model[run["model_id"]].append(run)
 
     aggregated: dict[str, dict] = {}
     for model_id, runs in sorted(by_model.items()):
+        # Converte inference_time_sec (segundos) para ms
         times = [
             r["inference_time_sec"] * 1000
             for r in runs
@@ -68,6 +116,7 @@ def _aggregate_model_stats(
         base: dict[str, Any] = {
             "requests": len(runs),
         }
+        # rows e n_features devem ser consistentes entre requisições
         if len(rows_set) == 1:
             base["rows"] = rows_set.pop()
         if len(n_feat_set) == 1:
@@ -78,7 +127,7 @@ def _aggregate_model_stats(
             std = statistics.stdev(times) if len(times) > 1 else 0.0
             n = len(times)
             se = std / math.sqrt(n)
-            z = 1.96
+            z = 1.96  # percentil 97.5 da normal → IC 95% bilateral
             base.update({
                 "inference_time_ms_avg": round(avg, 3),
                 "inference_time_ms_std": round(std, 3),
@@ -103,6 +152,11 @@ def _aggregate_model_stats(
 
 
 def _latency_stats(latencies_ms: list[float]) -> dict[str, Any]:
+    """Calcula estatísticas descritivas de latência HTTP.
+
+    Retorna média, mínimo, máximo e percentis (P50, P95, P99)
+    da lista de latências medidas em milissegundos.
+    """
     if not latencies_ms:
         return {}
     sorted_lat = sorted(latencies_ms)
@@ -128,6 +182,11 @@ def build_response(
     system_after: dict[str, Any] | None,
     results_file: str | None,
 ) -> dict[str, Any]:
+    """Monta o dicionário completo de resposta do stress test.
+
+    Combina metadados do teste, estatísticas de latência,
+    agregação por modelo e dados de sistema (antes/depois).
+    """
     successful = len(latencies_ms)
     failed = len(errors)
     timeouts = errors.count("timeout")
@@ -174,6 +233,11 @@ def format_summary(
     errors: list[str],
     total_duration_sec: float,
 ) -> str:
+    """Gera o texto de sumário para exibição no terminal.
+
+    Inclui throughput, latências (P50/P95/P99) e, quando aplicável,
+    as estatísticas por modelo com intervalo de confiança.
+    """
     successful = len(latencies_ms)
     failed = len(errors)
     timeouts = errors.count("timeout")
@@ -228,6 +292,11 @@ def format_summary(
 async def fetch_system_stats(
     client: httpx.AsyncClient, url: str
 ) -> dict[str, Any] | None:
+    """Consulta o endpoint /stats da API alvo para capturar estado do sistema.
+
+    Retorna uso de memória, CPUs, workers e load average do Pi.
+    Se falhar (API ocupada ou instável), retorna None sem abortar o teste.
+    """
     try:
         resp = await client.get(f"{url}/stats", timeout=10.0)
         resp.raise_for_status()
@@ -246,6 +315,23 @@ async def send_request(
     model_runs: list[dict[str, Any]],
     errors: list[str],
 ) -> None:
+    """Envia uma requisição HTTP para a API alvo com controle de concorrência.
+
+    O semáforo (asyncio.Semaphore) garante que no máximo N requisições
+    rodem simultaneamente. Cada requisição bem-sucedida registra:
+    - latência da chamada HTTP (ms)
+    - resultados dos modelos extraídos do corpo da resposta
+
+    Args:
+        client: Cliente HTTP compartilhado (httpx.AsyncClient).
+        url: URL completa do endpoint alvo.
+        method: Método HTTP (GET ou POST).
+        timeout: Timeout da requisição em segundos.
+        semaphore: Semáforo que limita a concorrência.
+        latencies: Lista compartilhada para registrar latências.
+        model_runs: Lista compartilhada para registrar resultados de modelos.
+        errors: Lista compartilhada para registrar falhas.
+    """
     async with semaphore:
         try:
             start = time.perf_counter()
@@ -271,6 +357,20 @@ async def send_request(
 async def run_stress_test(
     request: StressTestRequest,
 ) -> dict[str, Any]:
+    """Função principal: executa o teste de estresse completo.
+
+    Fluxo:
+    1. Captura estado do sistema (Pi) antes do teste via GET /stats
+    2. Dispara N requisições concorrentes contra o endpoint alvo
+    3. Captura estado do sistema depois do teste
+    4. Agrega resultados por modelo com IC 95%
+    5. Salva JSON com timestamp em results_inference/
+    6. Retorna dicionário completo com dados e sumário textual
+
+    A concorrência é controlada por asyncio.Semaphore(concurrency),
+    garantindo que o Pi não seja inundado com requisições além do
+    limite configurado.
+    """
     full_url = f"{request.target_url}{request.endpoint}"
     latencies: list[float] = []
     model_runs: list[dict[str, Any]] = []
@@ -329,6 +429,15 @@ def save_result(
     system_before: dict[str, Any] | None,
     system_after: dict[str, Any] | None,
 ) -> str:
+    """Salva o resultado do stress test em um arquivo JSON.
+
+    O arquivo é nomeado com timestamp (stress_test_YYYYMMDD_HHMMSS.json)
+    e salvo no diretório configurado (padrão: results_inference/).
+    O diretório é criado automaticamente se não existir.
+
+    Returns:
+        Caminho absoluto do arquivo salvo.
+    """
     os.makedirs(request.output_dir, exist_ok=True)
     timestamp = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
     filename = f"stress_test_{timestamp}.json"
