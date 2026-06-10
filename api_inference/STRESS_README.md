@@ -120,6 +120,24 @@ pool. No Raspberry Pi 4 (4 CPUs), valores recomendados:
 | `4` | Máximo throughput, 1 worker por CPU |
 | `6+` | Oversubscription — mais processos que CPUs |
 
+#### Como alterar os workers no Pi
+
+**Não precisa rebuildar a imagem Docker** — a env var é lida em runtime.
+Basta editar o `docker-compose.yml` no Pi e reiniciar o container:
+
+```bash
+ssh pi@192.168.20.83
+cd ~/api_inference
+# Altere o valor no docker-compose.yml com seu editor, ou via sed:
+sed -i 's/UVICORN_WORKERS: 4/UVICORN_WORKERS: 2/' docker-compose.yml
+# Só reinicia o container, sem rebuild:
+docker compose up -d
+```
+
+O `docker compose up -d` recria o container com a nova variável de ambiente
+sem rebuildar a imagem, porque o `Dockerfile` não mudou — só a configuração
+em runtime.
+
 ### 3. Threads do scikit-learn (`OMP_NUM_THREADS`)
 
 O scikit-learn usa OpenMP internamente para paralelizar operações. Com

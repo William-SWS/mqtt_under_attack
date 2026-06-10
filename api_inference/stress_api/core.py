@@ -13,6 +13,7 @@ Uso típico:
 from __future__ import annotations
 
 import asyncio
+import csv
 import json
 import math
 import os
@@ -429,23 +430,150 @@ def save_result(
     system_before: dict[str, Any] | None,
     system_after: dict[str, Any] | None,
 ) -> str:
-    """Salva o resultado do stress test em um arquivo JSON.
+    """Salva o resultado do stress test em JSON e CSV com timestamp.
 
-    O arquivo é nomeado com timestamp (stress_test_YYYYMMDD_HHMMSS.json)
-    e salvo no diretório configurado (padrão: results_inference/).
+    Gera dois arquivos no diretório configurado (padrão: results_inference/):
+      - stress_test_YYYYMMDD_HHMMSS.json
+      - stress_test_YYYYMMDD_HHMMSS.csv
+
     O diretório é criado automaticamente se não existir.
 
     Returns:
-        Caminho absoluto do arquivo salvo.
+        Caminho absoluto do arquivo JSON salvo.
     """
     os.makedirs(request.output_dir, exist_ok=True)
     timestamp = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
-    filename = f"stress_test_{timestamp}.json"
-    filepath = os.path.join(request.output_dir, filename)
+
+    json_filename = f"stress_test_{timestamp}.json"
+    json_path = os.path.join(request.output_dir, json_filename)
     data = build_response(
         request, latencies_ms, model_runs, errors, total_duration_sec,
-        system_before, system_after, filepath,
+        system_before, system_after, json_path,
     )
-    with open(filepath, "w", encoding="utf-8") as f:
+    with open(json_path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
-    return filepath
+
+    save_result_csv(
+        request, latencies_ms, model_runs, errors, total_duration_sec,
+        system_before, system_after, timestamp,
+    )
+
+    return json_path
+
+
+def save_result_csv(
+    request: StressTestRequest,
+    latencies_ms: list[float],
+    model_runs: list[dict[str, Any]],
+    errors: list[str],
+    total_duration_sec: float,
+    system_before: dict[str, Any] | None,
+    system_after: dict[str, Any] | None,
+    timestamp: str,
+) -> str:
+    """Salva o resultado do stress test em CSV (uma linha por modelo).
+
+    Colunas:
+      - timestamp, target_url, endpoint, concurrency, requests
+      - duration_sec, throughput_req_per_sec
+      - uvicorn_workers, memory_used_mb, memory_available_mb, memory_total_mb
+      - model_id, n_requests, inference_time_ms_*, accuracy_avg
+
+    Returns:
+        Caminho absoluto do arquivo CSV salvo.
+    """
+    csv_filename = f"stress_test_{timestamp}.csv"
+    csv_path = os.path.join(request.output_dir, csv_filename)
+
+    successful = len(latencies_ms)
+    throughput = round(
+        successful / total_duration_sec if total_duration_sec > 0 else 0.0, 2
+    )
+    workers = (
+        system_before.get("uvicorn_workers", "N/A")
+        if system_before
+        else "N/A"
+    )
+    mem_used = (
+        system_before.get("memory_used_mb", "N/A")
+        if system_before
+        else "N/A"
+    )
+    mem_avail = (
+        system_before.get("memory_available_mb", "N/A")
+        if system_before
+        else "N/A"
+    )
+    mem_total = (
+        system_before.get("memory_total_mb", "N/A")
+        if system_before
+        else "N/A"
+    )
+
+    fields = [
+        "timestamp",
+        "target_url",
+        "endpoint",
+        "concurrency",
+        "requests",
+        "duration_sec",
+        "throughput_req_per_sec",
+        "uvicorn_workers",
+        "memory_used_mb",
+        "memory_available_mb",
+        "memory_total_mb",
+        "model_id",
+        "n_requests",
+        "inference_time_ms_avg",
+        "inference_time_ms_std",
+        "inference_time_ms_min",
+        "inference_time_ms_max",
+        "inference_time_ms_p50",
+        "inference_time_ms_ci95_lower",
+        "inference_time_ms_ci95_upper",
+        "accuracy_avg",
+    ]
+
+    meta = {
+        "timestamp": timestamp,
+        "target_url": request.target_url,
+        "endpoint": request.endpoint,
+        "concurrency": request.concurrency,
+        "requests": request.requests,
+        "duration_sec": round(total_duration_sec, 3),
+        "throughput_req_per_sec": throughput,
+        "uvicorn_workers": workers,
+        "memory_used_mb": mem_used,
+        "memory_available_mb": mem_avail,
+        "memory_total_mb": mem_total,
+    }
+
+    model_agg = _aggregate_model_stats(model_runs)
+
+    with open(csv_path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=fields)
+        writer.writeheader()
+
+        if model_agg:
+            for model_id, agg in model_agg.items():
+                row = {**meta}
+                row["model_id"] = model_id
+                row["n_requests"] = agg.get("requests", "N/A")
+                row["inference_time_ms_avg"] = agg.get("inference_time_ms_avg", "N/A")
+                row["inference_time_ms_std"] = agg.get("inference_time_ms_std", "N/A")
+                row["inference_time_ms_min"] = agg.get("inference_time_ms_min", "N/A")
+                row["inference_time_ms_max"] = agg.get("inference_time_ms_max", "N/A")
+                row["inference_time_ms_p50"] = agg.get("inference_time_ms_p50", "N/A")
+                row["inference_time_ms_ci95_lower"] = agg.get("inference_time_ms_ci95_lower", "N/A")
+                row["inference_time_ms_ci95_upper"] = agg.get("inference_time_ms_ci95_upper", "N/A")
+                row["accuracy_avg"] = agg.get("accuracy_avg", "N/A")
+                writer.writerow(row)
+        else:
+            # Endpoint sem modelo (ex: /health) — uma linha com N/A
+            row = {**meta}
+            row["model_id"] = "N/A"
+            for col in fields[11:]:
+                row.setdefault(col, "N/A")
+            writer.writerow(row)
+
+    return csv_path
