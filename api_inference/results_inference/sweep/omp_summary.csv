@@ -1,7 +1,0 @@
-omp_threads,timestamp,concurrency,requests_total,duration_sec,throughput_req_per_sec,error_rate_pct,uvicorn_workers,memory_used_mb,memory_total_mb,model_id,n_samples,inference_time_ms_avg,inference_time_ms_ci95_lower,inference_time_ms_ci95_upper
-10,2026-06-11T20:49:03Z,50,50,120.037,0.0,100.0,4,2306,3795,N/A,N/A,N/A,N/A,N/A
-20,2026-06-11T20:51:30Z,50,50,120.033,0.0,100.0,4,2347,3795,N/A,N/A,N/A,N/A,N/A
-30,2026-06-11T20:53:57Z,50,50,120.037,0.0,100.0,4,2335,3795,N/A,N/A,N/A,N/A,N/A
-40,2026-06-11T20:56:23Z,50,50,120.052,0.0,100.0,4,2333,3795,N/A,N/A,N/A,N/A,N/A
-50,2026-06-11T20:58:50Z,50,50,120.033,0.0,100.0,4,2337,3795,N/A,N/A,N/A,N/A,N/A
-100,2026-06-11T21:01:17Z,50,50,120.03,0.0,100.0,4,2340,3795,N/A,N/A,N/A,N/A,N/A

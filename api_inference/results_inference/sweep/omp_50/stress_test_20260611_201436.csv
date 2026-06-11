@@ -1,6 +1,0 @@
-timestamp,target_url,endpoint,concurrency,requests,duration_sec,throughput_req_per_sec,uvicorn_workers,memory_used_mb,memory_available_mb,memory_total_mb,model_id,n_requests,inference_time_ms_avg,inference_time_ms_std,inference_time_ms_min,inference_time_ms_max,inference_time_ms_p50,inference_time_ms_ci95_lower,inference_time_ms_ci95_upper,accuracy_avg
-20260611_201436,http://192.168.20.83:8000,/benchmark,50,50,114.911,0.44,4,2856,939,3795,extratrees_gradientboosting,50,632.24,342.386,289.411,1622.405,564.496,537.336,727.145,0.9754
-20260611_201436,http://192.168.20.83:8000,/benchmark,50,50,114.911,0.44,4,2856,939,3795,lowvariance_decisiontree,50,112.766,57.518,39.185,316.697,99.369,96.823,128.709,0.9688
-20260611_201436,http://192.168.20.83:8000,/benchmark,50,50,114.911,0.44,4,2856,939,3795,lowvariance_gradientboosting,50,452.223,187.278,228.78,904.222,400.241,400.313,504.134,0.9754
-20260611_201436,http://192.168.20.83:8000,/benchmark,50,50,114.911,0.44,4,2856,939,3795,lowvariance_lda,50,102.605,49.602,19.06,230.789,98.248,88.857,116.354,0.9239
-20260611_201436,http://192.168.20.83:8000,/benchmark,50,50,114.911,0.44,4,2856,939,3795,lowvariance_randomforest,50,5358.932,2329.868,1578.559,10252.595,6071.231,4713.126,6004.739,0.9735
