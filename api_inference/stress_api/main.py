@@ -8,6 +8,7 @@ Uso:
 Endpoints:
     GET  /health   — health check do próprio servidor
     POST /run      — dispara um teste de estresse completo
+    POST /sweep    — varredura automática de OMP_NUM_THREADS
 
 O servidor roda na máquina local (PC) e faz requisições HTTP concorrentes
 contra a API alvo (Raspberry Pi em 192.168.20.83:8000).
@@ -15,9 +16,10 @@ contra a API alvo (Raspberry Pi em 192.168.20.83:8000).
 
 from __future__ import annotations
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 
 from stress_api.core import StressTestRequest, run_stress_test
+from stress_api.sweep import SweepRequest, run_sweep
 
 app = FastAPI(
     title="MQTT Under Attack Stress Test API",
@@ -46,3 +48,27 @@ async def run(req: StressTestRequest) -> dict:
             -d '{"target_url": "http://192.168.20.83:8000"}'
     """
     return await run_stress_test(req)
+
+
+@app.post("/sweep")
+async def sweep(req: SweepRequest) -> dict:
+    """Executa varredura automática de OMP_NUM_THREADS no Pi.
+
+    Para cada valor de OMP (padrão: 5, 10, 20, 30, 40, 50, 100):
+      1. Altera OMP_NUM_THREADS no docker-compose.yml do Pi via SSH
+      2. Reinicia o container
+      3. Aguarda API saudável
+      4. Executa stress test (concurrency=50, requests=50)
+      5. Salva JSON + CSV em results_inference/sweep/omp_{N}/
+
+    ATENÇÃO: Esta requisição leva vários minutos (um cenário por vez).
+
+    Exemplo:
+        curl -X POST http://localhost:8001/sweep \\
+            -H "Content-Type: application/json" \\
+            -d '{"pi_host": "192.168.20.83", "omp_list": "5,10,20"}'
+    """
+    try:
+        return await run_sweep(req)
+    except RuntimeError as e:
+        raise HTTPException(status_code=500, detail=str(e))

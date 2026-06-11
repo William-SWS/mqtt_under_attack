@@ -380,28 +380,32 @@ async def run_stress_test(
 
     system_before: dict[str, Any] | None = None
     system_after: dict[str, Any] | None = None
+    total_duration = 0.0
 
     async with httpx.AsyncClient() as client:
         system_before = await fetch_system_stats(client, request.target_url)
 
         start = time.perf_counter()
-        tasks = [
-            send_request(
-                client,
-                full_url,
-                request.method,
-                request.timeout,
-                semaphore,
-                latencies,
-                model_runs,
-                errors,
-            )
-            for _ in range(request.requests)
-        ]
-        await asyncio.gather(*tasks)
-        total_duration = time.perf_counter() - start
-
-        system_after = await fetch_system_stats(client, request.target_url)
+        try:
+            tasks = [
+                send_request(
+                    client,
+                    full_url,
+                    request.method,
+                    request.timeout,
+                    semaphore,
+                    latencies,
+                    model_runs,
+                    errors,
+                )
+                for _ in range(request.requests)
+            ]
+            await asyncio.gather(*tasks)
+        except Exception:
+            pass  # garante que o finally seja executado mesmo com crash
+        finally:
+            total_duration = time.perf_counter() - start
+            system_after = await fetch_system_stats(client, request.target_url)
 
     results_file = save_result(
         request, latencies, model_runs, errors, total_duration,
