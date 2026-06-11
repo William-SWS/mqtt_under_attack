@@ -59,7 +59,13 @@ def set_omp_on_pi(host: str, omp_value: int) -> None:
         raise RuntimeError("Falha ao alterar OMP no Pi")
 
     # Reinicia o container (sem rebuild)
-    result = ssh(host, "cd ~/api_inference && docker compose down --timeout 5 2>/dev/null; docker compose up -d")
+    result = ssh(
+        host,
+        "docker kill $(docker ps -q --filter publish=8000) 2>/dev/null; "
+        "docker rm -f $(docker ps -aq --filter publish=8000) 2>/dev/null; "
+        "sleep 2; "
+        "cd ~/api_inference && docker compose up -d",
+    )
     if result.returncode != 0:
         print(f"  [Pi] ERRO ao reiniciar container: {result.stderr.strip()}")
         raise RuntimeError("Falha ao reiniciar container no Pi")

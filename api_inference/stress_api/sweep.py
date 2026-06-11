@@ -61,7 +61,12 @@ async def _set_omp_on_pi(host: str, omp_value: int) -> None:
     cmds = [
         f"cd ~/api_inference && sed -i 's/OMP_NUM_THREADS: .*/OMP_NUM_THREADS: {omp_value}/' docker-compose.yml",
         f"cd ~/api_inference && sed -i 's/OPENBLAS_NUM_THREADS: .*/OPENBLAS_NUM_THREADS: {omp_value}/' docker-compose.yml",
-        "cd ~/api_inference && docker compose down --timeout 5 2>/dev/null; docker compose up -d",
+        # Mata QUALQUER container na porta 8000 (de projetos anteriores),
+        # depois sobe o container com as novas env vars
+        "docker kill $(docker ps -q --filter publish=8000) 2>/dev/null; "
+        "docker rm -f $(docker ps -aq --filter publish=8000) 2>/dev/null; "
+        "sleep 2; "
+        "cd ~/api_inference && docker compose up -d",
     ]
     for cmd in cmds:
         await _ssh(host, cmd)
