@@ -50,7 +50,7 @@ def set_omp_on_pi(host: str, omp_value: int) -> None:
     # Atualiza a env var no docker-compose.yml
     result = ssh(
         host,
-        f"cd ~/api_inference && "
+        f"cd ~/mqtt-inference && "
         f"sed -i 's/OMP_NUM_THREADS: .*/OMP_NUM_THREADS: {omp_value}/' docker-compose.yml && "
         f"sed -i 's/OPENBLAS_NUM_THREADS: .*/OPENBLAS_NUM_THREADS: {omp_value}/' docker-compose.yml",
     )
@@ -64,7 +64,7 @@ def set_omp_on_pi(host: str, omp_value: int) -> None:
         "docker kill $(docker ps -q --filter publish=8000) 2>/dev/null; "
         "docker rm -f $(docker ps -aq --filter publish=8000) 2>/dev/null; "
         "sleep 2; "
-        "cd ~/api_inference && docker compose up -d",
+        "cd ~/mqtt-inference && docker compose up -d",
     )
     if result.returncode != 0:
         print(f"  [Pi] ERRO ao reiniciar container: {result.stderr.strip()}")

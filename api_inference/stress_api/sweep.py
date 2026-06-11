@@ -59,14 +59,14 @@ async def _ssh(host: str, cmd: str) -> str:
 async def _set_omp_on_pi(host: str, omp_value: int) -> None:
     """Altera OMP_NUM_THREADS e OPENBLAS_NUM_THREADS no docker-compose do Pi e reinicia."""
     cmds = [
-        f"cd ~/api_inference && sed -i 's/OMP_NUM_THREADS: .*/OMP_NUM_THREADS: {omp_value}/' docker-compose.yml",
-        f"cd ~/api_inference && sed -i 's/OPENBLAS_NUM_THREADS: .*/OPENBLAS_NUM_THREADS: {omp_value}/' docker-compose.yml",
+        f"cd ~/mqtt-inference && sed -i 's/OMP_NUM_THREADS: .*/OMP_NUM_THREADS: {omp_value}/' docker-compose.yml",
+        f"cd ~/mqtt-inference && sed -i 's/OPENBLAS_NUM_THREADS: .*/OPENBLAS_NUM_THREADS: {omp_value}/' docker-compose.yml",
         # Mata QUALQUER container na porta 8000 (de projetos anteriores),
         # depois sobe o container com as novas env vars
         "docker kill $(docker ps -q --filter publish=8000) 2>/dev/null; "
         "docker rm -f $(docker ps -aq --filter publish=8000) 2>/dev/null; "
         "sleep 2; "
-        "cd ~/api_inference && docker compose up -d",
+        "cd ~/mqtt-inference && docker compose up -d",
     ]
     for cmd in cmds:
         await _ssh(host, cmd)
