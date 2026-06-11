@@ -3,7 +3,7 @@ Varredura automática de OMP_NUM_THREADS no Raspberry Pi.
 
 Para cada valor de OMP (padrão: 5, 10, 20, 30, 40, 50, 100):
   1. Altera OMP_NUM_THREADS no docker-compose.yml do Pi via SSH
-  2. Reinicia o container (docker compose up -d)
+  2. Reinicia o container (docker compose down && up -d)
   3. Aguarda a API do Pi ficar saudável
   4. Executa o stress test (concurrency=50, requests=50)
   5. Salva JSON + CSV em results_inference/sweep/omp_{N}/
@@ -59,7 +59,7 @@ def set_omp_on_pi(host: str, omp_value: int) -> None:
         raise RuntimeError("Falha ao alterar OMP no Pi")
 
     # Reinicia o container (sem rebuild)
-    result = ssh(host, "cd ~/api_inference && docker compose up -d")
+    result = ssh(host, "cd ~/api_inference && docker compose down --timeout 5 2>/dev/null; docker compose up -d")
     if result.returncode != 0:
         print(f"  [Pi] ERRO ao reiniciar container: {result.stderr.strip()}")
         raise RuntimeError("Falha ao reiniciar container no Pi")
