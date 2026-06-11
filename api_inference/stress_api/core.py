@@ -246,6 +246,7 @@ def format_summary(
         successful / total_duration_sec if total_duration_sec > 0 else 0.0
     )
     lat = _latency_stats(latencies_ms)
+    has_latency = bool(lat)
 
     lines = [
         "",
@@ -257,11 +258,21 @@ def format_summary(
         f"Successful: {successful}  |  Failed: {failed}  |  Timeouts: {timeouts}",
         f"Error rate: {(failed / max(request.requests, 1)) * 100:.1f}%",
         f"Throughput: {throughput:.1f} req/s",
-        "",
-        "--- Latency (ms) ---",
-        f"Avg: {lat.get('average', '?'):.1f}  |  Min: {lat.get('min', '?'):.1f}  |  Max: {lat.get('max', '?'):.1f}",
-        f"P50: {lat.get('p50', '?'):.1f}  |  P95: {lat.get('p95', '?'):.1f}  |  P99: {lat.get('p99', '?'):.1f}",
     ]
+
+    if has_latency:
+        lines.extend([
+            "",
+            "--- Latency (ms) ---",
+            (
+                f"Avg: {lat['average']:.1f}  |  Min: {lat['min']:.1f}  |  "
+                f"Max: {lat['max']:.1f}"
+            ),
+            f"P50: {lat['p50']:.1f}  |  P95: {lat['p95']:.1f}  |  P99: {lat['p99']:.1f}",
+        ])
+    else:
+        lines.append("")
+        lines.append("--- Latency (ms) --- N/A (nenhuma requisicao bem-sucedida)")
 
     model_agg = _aggregate_model_stats(model_runs)
     if model_agg:
@@ -269,19 +280,24 @@ def format_summary(
         lines.append("--- Per Model ---")
         for model_id, agg in model_agg.items():
             if "inference_time_ms_avg" in agg:
-                ci = agg.get("inference_time_ms_ci95_lower")
+                avg = agg["inference_time_ms_avg"]
+                p50 = agg["inference_time_ms_p50"]
+                std = agg.get("inference_time_ms_std", 0.0)
+                ci_lower = agg.get("inference_time_ms_ci95_lower")
+                ci_upper = agg.get("inference_time_ms_ci95_upper")
+                acc = agg.get("accuracy_avg", "N/A")
                 ci_str = (
-                    f"ci95=[{agg['inference_time_ms_ci95_lower']:.1f}, {agg['inference_time_ms_ci95_upper']:.1f}]ms"
-                    if ci is not None
+                    f"  ci95=[{ci_lower:.1f}, {ci_upper:.1f}]ms"
+                    if ci_lower is not None and ci_upper is not None
                     else ""
                 )
                 lines.append(
                     f"  {model_id}: {agg['requests']}x  "
-                    f"avg={agg['inference_time_ms_avg']:.1f}ms  "
-                    f"p50={agg['inference_time_ms_p50']:.1f}ms  "
-                    f"std={agg.get('inference_time_ms_std', '?'):.1f}ms  "
+                    f"avg={avg:.1f}ms  "
+                    f"p50={p50:.1f}ms  "
+                    f"std={std:.1f}ms"
                     f"{ci_str}  "
-                    f"acc={agg.get('accuracy_avg', 'N/A')}"
+                    f"acc={acc}"
                 )
 
     return "\n".join(lines)
