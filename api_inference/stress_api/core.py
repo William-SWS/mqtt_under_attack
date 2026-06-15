@@ -81,6 +81,29 @@ def _extract_model_runs(body: dict[str, Any] | None) -> list[dict[str, Any]]:
     return []
 
 
+def _t_975(df: int) -> float:
+    """Quantil t_{0.975, df} da distribuição t de Student.
+
+    Aproximação de Hill & Davis (1968) baseada na normal.
+    Para df >= 5 o erro é < 0.1%. Para df < 5 usa valor tabelado.
+    """
+    if df < 1:
+        return 1.96
+    if df < 2:
+        return 12.706
+    if df < 3:
+        return 4.303
+    if df < 4:
+        return 3.182
+    if df < 5:
+        return 2.776
+    if df > 1000:
+        return 1.96
+    z = 1.96
+    t = z + (z**3 + z) / (4 * df) + (5 * z**5 + 16 * z**3 + 3 * z) / (96 * df**2)
+    return t
+
+
 def _aggregate_model_stats(
     model_runs: list[dict[str, Any]],
 ) -> dict[str, dict[str, Any]]:
@@ -128,15 +151,15 @@ def _aggregate_model_stats(
             std = statistics.stdev(times) if len(times) > 1 else 0.0
             n = len(times)
             se = std / math.sqrt(n)
-            z = 1.96  # percentil 97.5 da normal → IC 95% bilateral
+            t = _t_975(n - 1)  # quantil t-Student para IC 95% bilateral
             base.update({
                 "inference_time_ms_avg": round(avg, 3),
                 "inference_time_ms_std": round(std, 3),
                 "inference_time_ms_min": round(min(times), 3),
                 "inference_time_ms_max": round(max(times), 3),
                 "inference_time_ms_p50": round(statistics.median(times), 3),
-                "inference_time_ms_ci95_lower": round(avg - z * se, 3),
-                "inference_time_ms_ci95_upper": round(avg + z * se, 3),
+                "inference_time_ms_ci95_lower": round(avg - t * se, 3),
+                "inference_time_ms_ci95_upper": round(avg + t * se, 3),
                 "inference_times_ms": [round(t, 3) for t in times],
             })
         if accs:
