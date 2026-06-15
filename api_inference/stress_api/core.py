@@ -163,12 +163,7 @@ def _aggregate_model_stats(
                 "inference_times_ms": [round(t, 3) for t in times],
             })
         if accs:
-            base.update({
-                "accuracy_avg": round(statistics.mean(accs), 4),
-                "accuracy_min": round(min(accs), 4),
-                "accuracy_max": round(max(accs), 4),
-                "accuracies": [round(a, 4) for a in accs],
-            })
+            base["accuracy"] = round(statistics.mean(accs), 4)
 
         aggregated[model_id] = base
 
@@ -308,7 +303,7 @@ def format_summary(
                 std = agg.get("inference_time_ms_std", 0.0)
                 ci_lower = agg.get("inference_time_ms_ci95_lower")
                 ci_upper = agg.get("inference_time_ms_ci95_upper")
-                acc = agg.get("accuracy_avg", "N/A")
+                acc = agg.get("accuracy", "N/A")
                 ci_str = (
                     f"  ci95=[{ci_lower:.1f}, {ci_upper:.1f}]ms"
                     if ci_lower is not None and ci_upper is not None
@@ -520,7 +515,7 @@ def save_result_csv(
       - timestamp, target_url, endpoint, concurrency, requests
       - duration_sec, throughput_req_per_sec
       - uvicorn_workers, memory_used_mb, memory_available_mb, memory_total_mb
-      - model_id, n_requests, inference_time_ms_*, accuracy_avg
+      - model_id, n_requests, inference_time_ms_*, accuracy
 
     Returns:
         Caminho absoluto do arquivo CSV salvo.
@@ -574,7 +569,7 @@ def save_result_csv(
         "inference_time_ms_p50",
         "inference_time_ms_ci95_lower",
         "inference_time_ms_ci95_upper",
-        "accuracy_avg",
+        "accuracy",
     ]
 
     meta = {
@@ -609,7 +604,7 @@ def save_result_csv(
                 row["inference_time_ms_p50"] = agg.get("inference_time_ms_p50", "N/A")
                 row["inference_time_ms_ci95_lower"] = agg.get("inference_time_ms_ci95_lower", "N/A")
                 row["inference_time_ms_ci95_upper"] = agg.get("inference_time_ms_ci95_upper", "N/A")
-                row["accuracy_avg"] = agg.get("accuracy_avg", "N/A")
+                row["accuracy"] = agg.get("accuracy", "N/A")
                 writer.writerow(row)
         else:
             # Endpoint sem modelo (ex: /health) — uma linha com N/A
