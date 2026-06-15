@@ -1,0 +1,6 @@
+timestamp,target_url,endpoint,concurrency,requests,duration_sec,throughput_req_per_sec,uvicorn_workers,memory_used_mb,memory_available_mb,memory_total_mb,model_id,n_requests,inference_time_ms_avg,inference_time_ms_std,inference_time_ms_min,inference_time_ms_max,inference_time_ms_p50,inference_time_ms_ci95_lower,inference_time_ms_ci95_upper,accuracy
+20260615_192840,http://192.168.20.83:8000,/benchmark,30,50,98.663,0.51,4,2382,1413,3795,extratrees_gradientboosting,50,604.339,224.786,250.646,1274.934,583.907,540.455,668.223,0.9754
+20260615_192840,http://192.168.20.83:8000,/benchmark,30,50,98.663,0.51,4,2382,1413,3795,lowvariance_decisiontree,50,109.474,62.651,30.087,376.654,103.983,91.669,127.279,0.9688
+20260615_192840,http://192.168.20.83:8000,/benchmark,30,50,98.663,0.51,4,2382,1413,3795,lowvariance_gradientboosting,50,452.434,169.999,264.945,969.874,392.775,404.121,500.748,0.9754
+20260615_192840,http://192.168.20.83:8000,/benchmark,30,50,98.663,0.51,4,2382,1413,3795,lowvariance_lda,50,117.546,79.292,30.482,412.36,95.943,95.011,140.081,0.9239
+20260615_192840,http://192.168.20.83:8000,/benchmark,30,50,98.663,0.51,4,2382,1413,3795,lowvariance_randomforest,50,4997.143,1658.331,2016.766,6981.006,5926.618,4525.847,5468.439,0.9735
