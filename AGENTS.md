@@ -4,7 +4,7 @@
 
 ## Active Branch
 
-`refactor-pipeline` — all work happens here.
+`inference` — all work happens here.
 
 ## Python
 
