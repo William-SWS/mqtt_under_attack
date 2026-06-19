@@ -1,0 +1,162 @@
+{
+  "test_info": {
+    "timestamp": "2026-06-19T16:08:52Z",
+    "target_url": "http://192.168.20.83:8000",
+    "endpoint": "/benchmark",
+    "method": "POST",
+    "concurrency": 30,
+    "requests": 50,
+    "timeout_sec": 240.0,
+    "duration_sec": 480.046
+  },
+  "results": {
+    "successful": 4,
+    "failed": 46,
+    "timeouts": 46,
+    "error_rate_pct": 92.0,
+    "throughput_req_per_sec": 0.01
+  },
+  "latency_ms": {
+    "average": 173618.77,
+    "min": 164209.1,
+    "max": 179038.93,
+    "p50": 175613.53,
+    "p95": 179038.93,
+    "p99": 179038.93,
+    "all": [
+      164209.098,
+      173511.969,
+      177715.088,
+      179038.934
+    ]
+  },
+  "system_before": {
+    "uvicorn_workers": 4,
+    "cpu_count": 4,
+    "thread_pool_max_workers": 8,
+    "memory_total_mb": 3795,
+    "memory_used_mb": 2011,
+    "memory_available_mb": 1784,
+    "load_avg_1min": 0.0,
+    "load_avg_5min": 0.09,
+    "load_avg_15min": 0.08
+  },
+  "system_after": null,
+  "results_file": "results_inference/stress_test_20260619_160852.json",
+  "per_model": {
+    "extratrees_gradientboosting": {
+      "requests": 4,
+      "rows": 18925,
+      "n_features": 15,
+      "inference_time_ms_avg": 2093.307,
+      "inference_time_ms_std": 836.913,
+      "inference_time_ms_min": 994.498,
+      "inference_time_ms_max": 2775.703,
+      "inference_time_ms_p50": 2301.514,
+      "inference_time_ms_ci95_lower": 761.778,
+      "inference_time_ms_ci95_upper": 3424.836,
+      "inference_times_ms": [
+        1888.28,
+        2714.747,
+        2775.703,
+        994.498
+      ],
+      "accuracy": 0.9754
+    },
+    "lowvariance_decisiontree": {
+      "requests": 4,
+      "rows": 18925,
+      "n_features": 12,
+      "inference_time_ms_avg": 168.001,
+      "inference_time_ms_std": 28.811,
+      "inference_time_ms_min": 125.414,
+      "inference_time_ms_max": 189.101,
+      "inference_time_ms_p50": 178.745,
+      "inference_time_ms_ci95_lower": 122.163,
+      "inference_time_ms_ci95_upper": 213.84,
+      "inference_times_ms": [
+        125.414,
+        179.23,
+        178.26,
+        189.101
+      ],
+      "accuracy": 0.9688
+    },
+    "lowvariance_gradientboosting": {
+      "requests": 4,
+      "rows": 18925,
+      "n_features": 12,
+      "inference_time_ms_avg": 1873.63,
+      "inference_time_ms_std": 377.08,
+      "inference_time_ms_min": 1334.128,
+      "inference_time_ms_max": 2213.366,
+      "inference_time_ms_p50": 1973.514,
+      "inference_time_ms_ci95_lower": 1273.697,
+      "inference_time_ms_ci95_upper": 2473.564,
+      "inference_times_ms": [
+        1965.437,
+        1981.59,
+        2213.366,
+        1334.128
+      ],
+      "accuracy": 0.9754
+    },
+    "lowvariance_lda": {
+      "requests": 4,
+      "rows": 18925,
+      "n_features": 12,
+      "inference_time_ms_avg": 130.576,
+      "inference_time_ms_std": 30.96,
+      "inference_time_ms_min": 110.321,
+      "inference_time_ms_max": 176.007,
+      "inference_time_ms_p50": 117.989,
+      "inference_time_ms_ci95_lower": 81.32,
+      "inference_time_ms_ci95_upper": 179.833,
+      "inference_times_ms": [
+        111.493,
+        176.007,
+        110.321,
+        124.486
+      ],
+      "accuracy": 0.9239
+    },
+    "lowvariance_randomforest": {
+      "requests": 4,
+      "rows": 18925,
+      "n_features": 12,
+      "inference_time_ms_avg": 5890.067,
+      "inference_time_ms_std": 2319.17,
+      "inference_time_ms_min": 2414.521,
+      "inference_time_ms_max": 7153.788,
+      "inference_time_ms_p50": 6995.979,
+      "inference_time_ms_ci95_lower": 2200.268,
+      "inference_time_ms_ci95_upper": 9579.866,
+      "inference_times_ms": [
+        6914.9,
+        7077.059,
+        7153.788,
+        2414.521
+      ],
+      "accuracy": 0.9735
+    },
+    "lowvariance_svm": {
+      "requests": 4,
+      "rows": 18925,
+      "n_features": 12,
+      "inference_time_ms_avg": 62773.226,
+      "inference_time_ms_std": 13123.851,
+      "inference_time_ms_min": 54823.173,
+      "inference_time_ms_max": 82334.542,
+      "inference_time_ms_p50": 56967.594,
+      "inference_time_ms_ci95_lower": 41893.18,
+      "inference_time_ms_ci95_upper": 83653.273,
+      "inference_times_ms": [
+        82334.542,
+        54823.173,
+        58280.457,
+        55654.732
+      ],
+      "accuracy": 0.9291
+    }
+  }
+}
