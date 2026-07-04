@@ -1,0 +1,33 @@
+{
+  "test_info": {
+    "timestamp": "2026-07-04T14:48:21Z",
+    "target_url": "http://192.168.20.83:8000",
+    "endpoint": "/benchmark",
+    "method": "POST",
+    "concurrency": 30,
+    "requests": 50,
+    "timeout_sec": 300.0,
+    "duration_sec": 600.041
+  },
+  "results": {
+    "successful": 0,
+    "failed": 50,
+    "timeouts": 50,
+    "error_rate_pct": 100.0,
+    "throughput_req_per_sec": 0.0
+  },
+  "latency_ms": {},
+  "system_before": {
+    "uvicorn_workers": 4,
+    "cpu_count": 4,
+    "thread_pool_max_workers": 8,
+    "memory_total_mb": 3795,
+    "memory_used_mb": 2018,
+    "memory_available_mb": 1777,
+    "load_avg_1min": 1.29,
+    "load_avg_5min": 0.83,
+    "load_avg_15min": 0.46
+  },
+  "system_after": null,
+  "results_file": "results_inference/stress_test_20260704_144821.json"
+}
