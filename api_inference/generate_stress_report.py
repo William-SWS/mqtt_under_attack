@@ -392,6 +392,22 @@ def _format_multiplier(value: float | None) -> str:
     return f"{value:.1f}x"
 
 
+def build_feature_selection_section() -> list[str]:
+    return [
+        "## 2.1 Melhor seletor de features para a borda",
+        "",
+        "O melhor par para deploy na borda foi o **LowVariance + GradientBoosting**. Ele combina o menor custo de dimensionalidade com desempenho de classificação no mesmo patamar dos melhores pares do pipeline, o que o torna mais adequado quando o Raspberry Pi entra em regimes de concorrência alta.",
+        "",
+        "| Seletor | Modelo | n_features | F1-score | Log loss | Tempo de treino | Tempo de inferência | Motivo da escolha |",
+        "|---|---|---|---|---|---|---|---|",
+        "| LowVariance | GradientBoosting | 12 | 0.9754 | 0.0714 | 10.88 s | 0.056 s | Melhor equilíbrio entre qualidade e custo: mesma ordem de F1 dos melhores pares, mas com menos features que os seletores de 15 colunas |",
+        "| ExtraTrees | GradientBoosting | 15 | 0.9754 | 0.0714 | 10.73 s | 0.055 s | Desempenho equivalente, porém com 3 features extras e, portanto, maior custo de processamento |",
+        "",
+        "Justificativa prática: em um cenário de mais threads, a pressão recai primeiro sobre a etapa de inferência. O run com **100 threads** do SVM mostrou fragilidade extrema, com apenas **4/50** requisições bem-sucedidas e **46 timeouts**, o que reforça a escolha de um seletor mais compacto. O LowVariance reduz o espaço de entrada para 12 features sem sacrificar o F1, então ele preserva a qualidade do modelo e deixa o pipeline mais leve para o Raspberry Pi.",
+        "",
+    ]
+
+
 def build_report(models_df: pd.DataFrame, runs_df: pd.DataFrame, tradeoff_plot: Path, stability_plot: Path) -> str:
     top_fast = models_df.iloc[0]
     balanced_candidates = models_df[models_df["model_id"].isin(["lowvariance_decisiontree", "lowvariance_gradientboosting", "extratrees_gradientboosting"])]
@@ -419,6 +435,7 @@ def build_report(models_df: pd.DataFrame, runs_df: pd.DataFrame, tradeoff_plot: 
         "",
         "Os artefatos desta pasta registram a execução da API de inferência sob carga concorrente. A API de stress dispara requisições HTTP contra o Raspberry Pi e mede latência, throughput, taxa de falha, timeouts e o comportamento por modelo.",
         "",
+        *build_feature_selection_section(),
         "## 2. Resumo executivo",
         "",
         f"- Modelo mais rápido no conjunto consolidado: **{top_fast['model_id']}** ({float(top_fast['inference_time_ms_avg']):.3f} ms).",
