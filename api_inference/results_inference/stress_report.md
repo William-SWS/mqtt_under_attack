@@ -1,6 +1,6 @@
 # Relatório de Stress Test da API de Inferência MQTT
 
-**Data de geração:** 2026-07-15 23:00
+**Data de geração:** 2026-07-15 23:12
 **Fonte dos dados:** arquivos JSON/CSV em `api_inference/results_inference/`
 **Alvo do stress test:** API de inferência no Raspberry Pi via `/benchmark`
 
@@ -30,7 +30,6 @@ Os artefatos desta pasta registram a execução da API de inferência sob carga 
 
 | Campo | Significado | Leitura prática |
 |---|---|---|
-| `tNN_...` / `filename` | Prefixo cronológico do teste e nome completo do arquivo | `tNN` ordena os testes na sequência em que foram executados; o restante do nome descreve workers, threads, concurrency e repetição do cenário |
 | `inference_time_ms_avg` | Média do tempo de inferência por requisição | Principal métrica para comparar rapidez dos modelos |
 | `inference_time_ms_p50` | Mediana do tempo de inferência | Mostra o comportamento típico sem os extremos |
 | `inference_time_ms_min/max` | Menor e maior tempo observado | Indicam dispersão e caudas de latência |
@@ -42,27 +41,28 @@ Os artefatos desta pasta registram a execução da API de inferência sob carga 
 | `throughput_req_per_sec` | Vazão de requisições por segundo | Mostra capacidade efetiva de processamento |
 | `latency_avg_ms` / `latency_p95_ms` | Latência HTTP da requisição de stress | Reflete o comportamento da API como serviço |
 | `load_before` / `load_after` | Load average do Raspberry Pi antes/depois | Mostra o impacto sistêmico do teste |
+| `memory_used_before_mb` / `memory_used_after_mb` | Memória usada antes/depois do teste | Indica se o stress aumentou o consumo de RAM durante a execução |
 
 ## 5. Resumo das execuções de stress
 
-| timestamp | filename | concurrency | requests | successful | failed | timeouts | throughput_req_per_sec | latency_avg_ms | latency_p95_ms | load_before | load_after |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2026-06-11T22:20:35Z | t01_workers4_concurrency50_allmodels.json | 50 | 50 | 50 | 0 | 0 | 0.42 | 81433.42 | 118343.04 | 0.16 | 4.7 |
-| 2026-06-11T22:47:31Z | t02_workers4_concurrency30_allmodels.json | 30 | 50 | 50 | 0 | 0 | 0.5 | 48161.44 | 61663.03 | 0.09 | 9.25 |
-| 2026-06-15T18:17:26Z | t03_workers4_concurrency30_allmodels_run01.json | 30 | 50 | 50 | 0 | 0 | 0.5 | 48081.18 | 61107.53 | 0.06 | 8.63 |
-| 2026-06-15T18:24:41Z | t04_workers4_concurrency30_allmodels_run02.json | 30 | 50 | 50 | 0 | 0 | 0.48 | 50237.62 | 65981.89 | 0.29 | 9.46 |
-| 2026-06-15T18:38:39Z | t05_workers4_concurrency30_allmodels_run03.json | 30 | 50 | 50 | 0 | 0 | 0.51 | 51639.67 | 66392.62 | 0.25 | 11.37 |
-| 2026-06-15T18:56:53Z | t06_workers4_concurrency30_allmodels_run04.json | 30 | 50 | 50 | 0 | 0 | 0.48 | 50744.5 | 65083.41 | 0.4 | 9.41 |
-| 2026-06-15T19:24:19Z | t07_workers4_concurrency30_allmodels_run05.json | 30 | 50 | 50 | 0 | 0 | 0.49 | 50364.05 | 62667.82 | 0.57 | 8.15 |
-| 2026-06-15T19:28:40Z | t08_workers4_concurrency30_allmodels_run06.json | 30 | 50 | 50 | 0 | 0 | 0.51 | 52247.12 | 67044.5 | 1.26 | 12.23 |
-| 2026-06-15T19:32:03Z | t09_workers4_concurrency30_allmodels_run07.json | 30 | 50 | 50 | 0 | 0 | 0.44 | 57301.41 | 104705.72 | 2.87 | 6.76 |
-| 2026-06-18T17:45:43Z | t10_workers4_concurrency30_svm_firstattempt.json | 30 | 50 | 6 | 44 | 44 | 0.01 | 224644.46 | 237323.04 | 0.42 | 13.16 |
-| 2026-06-19T16:08:52Z | t11_workers4_threads100_concurrency30_svm.json | 30 | 50 | 4 | 46 | 46 | 0.01 | 173618.77 | 179038.93 | 0 | - |
-| 2026-06-19T16:28:59Z | t12_workers4_threads50_concurrency30_svm.json | 30 | 50 | 41 | 9 | 9 | 0.05 | 337488.6 | 404241.22 | 0.1 | 6.65 |
-| 2026-06-19T18:16:55Z | t13_workers4_threads40_concurrency30_svm.json | 30 | 50 | 2 | 48 | 48 | 0 | 276368.77 | 298086.98 | 0.67 | 19.5 |
-| 2026-07-04T14:48:21Z | t14_workers4_concurrency30_allmodels_timeout01.json | 30 | 50 | 0 | 50 | 50 | 0 | - | - | 1.29 | - |
-| 2026-07-04T14:48:40Z | t15_workers4_concurrency30_allmodels_timeout02.json | 30 | 50 | 0 | 50 | 50 | 0 | - | - | - | - |
-| 2026-07-04T16:06:55Z | t16_workers4_concurrency15_allmodels.json | 15 | 50 | 50 | 0 | 0 | 0.07 | 202147.02 | 256146.07 | 0.62 | 7.18 |
+| timestamp | filename | concurrency | requests | successful | failed | timeouts | throughput_req_per_sec | latency_avg_ms | latency_p95_ms | load_before | load_after | memory_used_before_mb | memory_used_after_mb |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-06-11T22:20:35Z | t01_workers4_concurrency50_allmodels.json | 50 | 50 | 50 | 0 | 0 | 0.42 | 81433.42 | 118343.04 | 0.16 | 4.7 | 2087 | 2411 |
+| 2026-06-11T22:47:31Z | t02_workers4_concurrency30_allmodels.json | 30 | 50 | 50 | 0 | 0 | 0.5 | 48161.44 | 61663.03 | 0.09 | 9.25 | 2393 | 2481 |
+| 2026-06-15T18:17:26Z | t03_workers4_concurrency30_allmodels_run01.json | 30 | 50 | 50 | 0 | 0 | 0.5 | 48081.18 | 61107.53 | 0.06 | 8.63 | 2646 | 2711 |
+| 2026-06-15T18:24:41Z | t04_workers4_concurrency30_allmodels_run02.json | 30 | 50 | 50 | 0 | 0 | 0.48 | 50237.62 | 65981.89 | 0.29 | 9.46 | 2287 | 2736 |
+| 2026-06-15T18:38:39Z | t05_workers4_concurrency30_allmodels_run03.json | 30 | 50 | 50 | 0 | 0 | 0.51 | 51639.67 | 66392.62 | 0.25 | 11.37 | 2305 | 2748 |
+| 2026-06-15T18:56:53Z | t06_workers4_concurrency30_allmodels_run04.json | 30 | 50 | 50 | 0 | 0 | 0.48 | 50744.5 | 65083.41 | 0.4 | 9.41 | 2347 | 2752 |
+| 2026-06-15T19:24:19Z | t07_workers4_concurrency30_allmodels_run05.json | 30 | 50 | 50 | 0 | 0 | 0.49 | 50364.05 | 62667.82 | 0.57 | 8.15 | 2339 | 2786 |
+| 2026-06-15T19:28:40Z | t08_workers4_concurrency30_allmodels_run06.json | 30 | 50 | 50 | 0 | 0 | 0.51 | 52247.12 | 67044.5 | 1.26 | 12.23 | 2382 | 2802 |
+| 2026-06-15T19:32:03Z | t09_workers4_concurrency30_allmodels_run07.json | 30 | 50 | 50 | 0 | 0 | 0.44 | 57301.41 | 104705.72 | 2.87 | 6.76 | 2365 | 2805 |
+| 2026-06-18T17:45:43Z | t10_workers4_concurrency30_svm_firstattempt.json | 30 | 50 | 6 | 44 | 44 | 0.01 | 224644.46 | 237323.04 | 0.42 | 13.16 | 2202 | 2693 |
+| 2026-06-19T16:08:52Z | t11_workers4_threads100_concurrency30_svm.json | 30 | 50 | 4 | 46 | 46 | 0.01 | 173618.77 | 179038.93 | 0 | - | 2011 | - |
+| 2026-06-19T16:28:59Z | t12_workers4_threads50_concurrency30_svm.json | 30 | 50 | 41 | 9 | 9 | 0.05 | 337488.6 | 404241.22 | 0.1 | 6.65 | 2466 | 2498 |
+| 2026-06-19T18:16:55Z | t13_workers4_threads40_concurrency30_svm.json | 30 | 50 | 2 | 48 | 48 | 0 | 276368.77 | 298086.98 | 0.67 | 19.5 | 2398 | 2490 |
+| 2026-07-04T14:48:21Z | t14_workers4_concurrency30_allmodels_timeout01.json | 30 | 50 | 0 | 50 | 50 | 0 | - | - | 1.29 | - | 2018 | - |
+| 2026-07-04T14:48:40Z | t15_workers4_concurrency30_allmodels_timeout02.json | 30 | 50 | 0 | 50 | 50 | 0 | - | - | - | - | - | - |
+| 2026-07-04T16:06:55Z | t16_workers4_concurrency15_allmodels.json | 15 | 50 | 50 | 0 | 0 | 0.07 | 202147.02 | 256146.07 | 0.62 | 7.18 | 2005 | 2353 |
 
 ## 6. Destaque do SVM e divergências observadas
 

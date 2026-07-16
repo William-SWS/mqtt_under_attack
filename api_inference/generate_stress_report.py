@@ -207,6 +207,8 @@ def build_run_summary_table(df: pd.DataFrame) -> str:
         "latency_p95_ms",
         "load_before",
         "load_after",
+        "memory_used_before_mb",
+        "memory_used_after_mb",
     ]
     table_df = df[cols].copy()
     return _dataframe_to_markdown(table_df)
@@ -443,6 +445,7 @@ def build_report(models_df: pd.DataFrame, runs_df: pd.DataFrame, tradeoff_plot: 
         "| `throughput_req_per_sec` | Vazão de requisições por segundo | Mostra capacidade efetiva de processamento |",
         "| `latency_avg_ms` / `latency_p95_ms` | Latência HTTP da requisição de stress | Reflete o comportamento da API como serviço |",
         "| `load_before` / `load_after` | Load average do Raspberry Pi antes/depois | Mostra o impacto sistêmico do teste |",
+        "| `memory_used_before_mb` / `memory_used_after_mb` | Memória usada antes/depois do teste | Indica se o stress aumentou o consumo de RAM durante a execução |",
         "",
         "## 5. Resumo das execuções de stress",
         "",
