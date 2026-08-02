@@ -8,7 +8,8 @@
 
 ## Python
 
-Pinned to `==3.13.9` (`pyproject.toml`). Use `make requirements` or `pip install -r requirements.txt`.
+Pinned to `==3.13.9` (`pyproject.toml`). Conda env: `mqtt` (`miniconda3/envs/mqtt`).
+Use `make requirements` or `pip install -r requirements.txt`.
 
 ## Lint / Format
 
@@ -39,7 +40,7 @@ The notebook is the source of truth. `main.py` was a draft orchestrator with `n_
 
 Location: `models/models_ensemble_v2/optuna/` (`.pkl` via joblib).
 
-Best model: `lowvariance_gradientboosting` — 12 features, 995 KB, F1=0.9754.
+Best Pareto combination: `lowvariance_decisiontree` — 12 features, 7 KB, F1=0.9754, 95.8 ms batch inference (Raspberry Pi). Offers near-optimal F1 at 7× faster inference than GradientBoosting.
 
 ## Inference API (`api_inference/`)
 
@@ -58,6 +59,28 @@ cd ~/api_inference && docker compose build && docker compose up -d
 ```
 
 OpenMP oversubscription risk with `workers > 1`. Set `OMP_NUM_THREADS=1` if needed.
+
+## Benchmark data
+
+- Each `/benchmark/{model_id}` request loads the full test CSV (18925 data rows) and calls `model.predict()` on the entire batch.
+- Test datasets: `api_inference/datasets/test/test_optuna_by_selector_lowvariance_*.csv` (18926 lines = 1 header + 18925 rows).
+- Primary stress test run with all 5 lowvariance models: `api_inference/results_inference/t16_workers4_concurrency15_allmodels.csv` (n=50 per model, concurrency=15).
+- Aggregated CI95% stats: `api_inference/results_inference/inference_time_ci95_lowvariance.csv`.
+- Per-run stats: `api_inference/results_inference/inference_stats_by_run_lowvariance.csv`.
+- Optuna F1 scores: `reports_refactored/optuna_by_selector_results.csv` (seletor=LowVariance).
+
+## Pareto frontier scripts (`paretto/`)
+
+| Script | Time metric | Source |
+|---|---|---|
+| `plot_pareto_frontier_lowvariance.py` | mean batch time (ms) | aggregated CI95 CSV |
+| `plot_pareto_frontier_per_record_lowvariance.py` | mean / 18925 (ms/row) | aggregated CI95 CSV |
+| `plot_pareto_frontier_ci95_lowvariance.py` | CI95 lower + upper (ms) | t16 single run |
+| `plot_pareto_frontier_median_lowvariance.py` | median p50 (ms) | t16 single run |
+| `plot_pareto_frontier_median_per_line_lowvariance.py` | median p50 / 18925 (ms/row) | t16 single run |
+
+All use the same Pareto dominance logic: maximize combined score `(acc + F1) / 2`, minimize time.
+SVM has no F1 in optuna results — uses accuracy as proxy.
 
 ## Config
 

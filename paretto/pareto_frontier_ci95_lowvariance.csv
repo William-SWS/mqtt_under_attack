@@ -1,0 +1,6 @@
+model_id,time_ms_mean,time_ms_lower,time_ms_upper,accuracy,f1,combined,dominated_lower,pareto_frontier_lower,dominated_upper,pareto_frontier_upper
+lowvariance_lda,94.585,79.206,109.965,0.9239,0.9232436432040472,0.9235718216020237,True,False,False,True
+lowvariance_decisiontree,117.122,78.287,155.957,0.9688,0.9753604559530864,0.9720802279765433,False,True,False,True
+lowvariance_gradientboosting,718.653,609.378,827.929,0.9754,0.974454342285468,0.9749271711427341,False,True,False,True
+lowvariance_randomforest,5438.23,4765.364,6111.095,0.9735,0.9744537551921626,0.9739768775960813,True,False,True,False
+lowvariance_svm,140553.16,134194.929,146911.391,0.9291,,0.9291,True,False,True,False
