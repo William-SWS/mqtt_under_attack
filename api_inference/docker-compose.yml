@@ -1,0 +1,14 @@
+services:
+  inference-api:
+    build:
+      context: .
+    image: mqtt-under-attack-inference-api:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/app/models:ro
+      - ./datasets:/app/datasets:ro
+      - ./results_inference:/app/results_inference
+    environment:
+      API_INFERENCE_ROOT: /app
+      UVICORN_WORKERS: 4

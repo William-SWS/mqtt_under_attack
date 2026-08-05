@@ -1,0 +1,6 @@
+model_id,time_ms_p50,accuracy,f1,combined,dominated,pareto_frontier
+lowvariance_lda,82.234,0.9239,0.9232436432040472,0.9235718216020237,False,True
+lowvariance_decisiontree,95.798,0.9688,0.9753604559530864,0.9720802279765433,False,True
+lowvariance_gradientboosting,692.885,0.9754,0.974454342285468,0.9749271711427341,False,True
+lowvariance_randomforest,4897.255,0.9735,0.9744537551921626,0.9739768775960813,True,False
+lowvariance_svm,146159.933,0.9291,,0.9291,True,False

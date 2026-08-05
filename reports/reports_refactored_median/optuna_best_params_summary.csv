@@ -1,7 +1,0 @@
-modelo,best_f1_cv,best_params
-RandomForest,0.9644343463957376,"{""n_estimators"": 64, ""max_depth"": 20, ""min_samples_split"": 12, ""min_samples_leaf"": 5}"
-GradientBoosting,0.9636484868574097,"{""n_estimators"": 31, ""max_depth"": 8, ""learning_rate"": 0.27047297227177763, ""min_samples_split"": 12}"
-DecisionTree,0.9623577053772975,"{""max_depth"": 11, ""min_samples_split"": 10, ""min_samples_leaf"": 1}"
-LDA,0.6296345379639979,"{""solver"": ""lsqr"", ""shrinkage"": ""auto""}"
-QDA,0.6101815985316787,"{""reg_param"": 0.9036714480253212}"
-GaussianNB,0.3885904363175265,"{""var_smoothing"": 5.669849511478847e-08}"

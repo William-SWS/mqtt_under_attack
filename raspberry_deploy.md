@@ -12,7 +12,7 @@ Para obter melhor desempenho na execução do Python e das bibliotecas de Machin
 4. **Grave no Cartão SD:** Insira um cartão MicroSD no computador e clique em *Gravar*.
 5. **Primeiro Boot:** Insira o cartão no Raspberry Pi e ligue-o. Acesse-o via seu terminal SSH a partir da sua máquina:
    ```bash
-   ssh pi@<IP_DO_RASPBERRY>
+   ssh pi@192.168.20.83
    ```
 6. **Atualize o Sistema:**
    ```bash
@@ -47,13 +47,13 @@ Na sua máquina local/desktop, rode:
 
 ```bash
 # Crie o diretório de destino no Raspberry Pi via SSH:
-ssh pi@<IP_DO_RASPBERRY> "mkdir -p ~/mqtt_infer/models"
+ssh pi@192.168.20.83 "mkdir -p ~/mqtt_infer/models"
 
 # Transfira o melhor modelo (ex: RandomForest otimizado)
-scp models_optimized/RandomForest_optimized.joblib pi@<IP_DO_RASPBERRY>:~/mqtt_infer/models/
+scp models_optimized/RandomForest_optimized.joblib pi@192.168.20.83:~/mqtt_infer/models/
 
 # Transfira o script de inferência modularizado
-scp scripts/pi_inference.py pi@<IP_DO_RASPBERRY>:~/mqtt_infer/
+scp scripts/pi_inference.py pi@192.168.20.83:~/mqtt_infer/
 ```
 
 ## 4. Script Leve de Inferência em Tempo Real

@@ -1,0 +1,186 @@
+{
+  "test_info": {
+    "timestamp": "2026-06-18T17:45:43Z",
+    "target_url": "http://192.168.20.83:8000",
+    "endpoint": "/benchmark",
+    "method": "POST",
+    "concurrency": 30,
+    "requests": 50,
+    "timeout_sec": 240.0,
+    "duration_sec": 480.06
+  },
+  "results": {
+    "successful": 6,
+    "failed": 44,
+    "timeouts": 44,
+    "error_rate_pct": 88.0,
+    "throughput_req_per_sec": 0.01
+  },
+  "latency_ms": {
+    "average": 224644.46,
+    "min": 199885.83,
+    "max": 237323.04,
+    "p50": 226186.27,
+    "p95": 237323.04,
+    "p99": 237323.04,
+    "all": [
+      199885.833,
+      221784.547,
+      225674.92,
+      226697.627,
+      236500.817,
+      237323.04
+    ]
+  },
+  "system_before": {
+    "uvicorn_workers": 4,
+    "cpu_count": 4,
+    "thread_pool_max_workers": 8,
+    "memory_total_mb": 3795,
+    "memory_used_mb": 2202,
+    "memory_available_mb": 1593,
+    "load_avg_1min": 0.42,
+    "load_avg_5min": 0.17,
+    "load_avg_15min": 0.06
+  },
+  "system_after": {
+    "uvicorn_workers": 4,
+    "cpu_count": 4,
+    "thread_pool_max_workers": 8,
+    "memory_total_mb": 3795,
+    "memory_used_mb": 2693,
+    "memory_available_mb": 1102,
+    "load_avg_1min": 13.16,
+    "load_avg_5min": 16.45,
+    "load_avg_15min": 8.84
+  },
+  "results_file": "results_inference/stress_test_20260618_174543.json",
+  "per_model": {
+    "extratrees_gradientboosting": {
+      "requests": 6,
+      "rows": 18925,
+      "n_features": 15,
+      "inference_time_ms_avg": 2792.534,
+      "inference_time_ms_std": 1672.765,
+      "inference_time_ms_min": 1208.032,
+      "inference_time_ms_max": 4934.989,
+      "inference_time_ms_p50": 2192.123,
+      "inference_time_ms_ci95_lower": 1052.916,
+      "inference_time_ms_ci95_upper": 4532.152,
+      "inference_times_ms": [
+        2110.961,
+        4838.665,
+        4934.989,
+        2273.286,
+        1389.272,
+        1208.032
+      ],
+      "accuracy": 0.9754
+    },
+    "lowvariance_decisiontree": {
+      "requests": 6,
+      "rows": 18925,
+      "n_features": 12,
+      "inference_time_ms_avg": 106.728,
+      "inference_time_ms_std": 61.802,
+      "inference_time_ms_min": 23.442,
+      "inference_time_ms_max": 187.397,
+      "inference_time_ms_p50": 99.919,
+      "inference_time_ms_ci95_lower": 42.456,
+      "inference_time_ms_ci95_upper": 171.0,
+      "inference_times_ms": [
+        166.882,
+        97.323,
+        102.515,
+        187.397,
+        23.442,
+        62.81
+      ],
+      "accuracy": 0.9688
+    },
+    "lowvariance_gradientboosting": {
+      "requests": 6,
+      "rows": 18925,
+      "n_features": 12,
+      "inference_time_ms_avg": 1517.274,
+      "inference_time_ms_std": 819.76,
+      "inference_time_ms_min": 486.635,
+      "inference_time_ms_max": 2377.395,
+      "inference_time_ms_p50": 1784.048,
+      "inference_time_ms_ci95_lower": 664.752,
+      "inference_time_ms_ci95_upper": 2369.795,
+      "inference_times_ms": [
+        2377.395,
+        2076.698,
+        2103.377,
+        1491.399,
+        568.137,
+        486.635
+      ],
+      "accuracy": 0.9754
+    },
+    "lowvariance_lda": {
+      "requests": 6,
+      "rows": 18925,
+      "n_features": 12,
+      "inference_time_ms_avg": 89.937,
+      "inference_time_ms_std": 49.235,
+      "inference_time_ms_min": 31.417,
+      "inference_time_ms_max": 139.424,
+      "inference_time_ms_p50": 100.038,
+      "inference_time_ms_ci95_lower": 38.734,
+      "inference_time_ms_ci95_upper": 141.14,
+      "inference_times_ms": [
+        31.417,
+        130.569,
+        129.266,
+        139.424,
+        38.135,
+        70.809
+      ],
+      "accuracy": 0.9239
+    },
+    "lowvariance_randomforest": {
+      "requests": 6,
+      "rows": 18925,
+      "n_features": 12,
+      "inference_time_ms_avg": 5392.734,
+      "inference_time_ms_std": 3607.439,
+      "inference_time_ms_min": 1820.774,
+      "inference_time_ms_max": 9796.265,
+      "inference_time_ms_p50": 4172.401,
+      "inference_time_ms_ci95_lower": 1641.122,
+      "inference_time_ms_ci95_upper": 9144.347,
+      "inference_times_ms": [
+        5499.677,
+        9796.265,
+        9741.416,
+        1820.774,
+        2845.125,
+        2653.149
+      ],
+      "accuracy": 0.9735
+    },
+    "lowvariance_svm": {
+      "requests": 6,
+      "rows": 18925,
+      "n_features": 12,
+      "inference_time_ms_avg": 90213.763,
+      "inference_time_ms_std": 10303.893,
+      "inference_time_ms_min": 81095.332,
+      "inference_time_ms_max": 109130.934,
+      "inference_time_ms_p50": 88414.257,
+      "inference_time_ms_ci95_lower": 79498.069,
+      "inference_time_ms_ci95_upper": 100929.457,
+      "inference_times_ms": [
+        109130.934,
+        89393.292,
+        92692.166,
+        87435.221,
+        81095.332,
+        81535.633
+      ],
+      "accuracy": 0.9291
+    }
+  }
+}
