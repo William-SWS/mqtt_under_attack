@@ -165,15 +165,23 @@ imputadas/indicadoras.
 9. **Escala:** restringir a escala a colunas contínuas via `ColumnTransformer`.
 10. **Ajuste do SVM:** substituir o hold-out único 80/20 (`svm_hold_out`) pelo `svm_2_fold` já
     escrito, ou um `StratifiedKFold`, para a execução de produção.
-11. **Ensemble:** remover o bloco de ensemble (células 38–43) e todas as referências nos
-    resultados/relatório/resumo (células 47, 49, 52). O Optuna de modelos individuais
-    permanece inalterado (ver seção 5).
+11. **Ensemble (fora do escopo):** remover o bloco de ensemble (células 38–43) e todas as
+    referências nos resultados/relatório/resumo (células 47, 49, 52). Averaging, Hard Voting
+    e Soft Voting não entram na refatoração: o artigo os cita só como trabalho futuro. O
+    Optuna de modelos individuais permanece inalterado (ver seção 5).
 12. **Manutenção:** extrair a lógica duplicada (limpeza de colunas, cálculo de gap, avaliação,
     timing) para um módulo compartilhado e remover código morto (ver seção 6).
 
 ---
 
 ## 5. Removendo o ensemble do fluxo (e do Optuna)
+
+> **Fora do escopo da refatoração:** Averaging, Hard Voting e Smart Soft Voting (e qualquer
+> outro método de ensemble/voting) **não devem ser reimplementados nem migrados** na
+> refatoração. O artigo (WPMC 2026) não descreve nem reporta nenhum desses métodos; o ensemble
+> aparece apenas como **trabalho futuro** na Conclusão, a ser testado em aprendizado
+> federado. Random Forest e Gradient Boosting permanecem, mas como classificadores individuais
+> (é assim que o artigo os trata), sem combinação entre modelos.
 
 Contexto: hoje o ensemble **não** participa do ajuste de hiperparâmetros dos modelos. O
 Optuna global (células 32–33) e o por seletor (célula 45) otimizam modelos individuais via
