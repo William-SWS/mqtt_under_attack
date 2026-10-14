@@ -1,6 +1,6 @@
 [build-system]
-requires = ["flit_core >=3.2,<4"]
-build-backend = "flit_core.buildapi"
+requires = ["uv_build>=0.11.17,<0.12.0"]
+build-backend = "uv_build"
 
 [project]
 name = "mqtt_under_attack"
@@ -9,27 +9,34 @@ description = "ML pipeline for detecting DoS attacks in MQTT networks"
 authors = [
   { name = "William-SWS" },
 ]
-
 readme = "README.md"
 classifiers = [
     "Programming Language :: Python :: 3",
-
 ]
-requires-python = "==3.13.9"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "matplotlib>=3.11.2",
+    "numpy>=2.5.4",
+    "optuna>=5.0.0",
+    "pandas>=3.0.6",
+    "scikit-learn>=1.9.1",
+    "seaborn>=0.13.2",
+]
 
-# No [project.dependencies] here on purpose: install with
-# `make requirements` / `pip install -r requirements.txt` (root pipeline) or
-# `pip install -r api_inference/requirements.txt` (inference API, separate env).
+[tool.uv.build-backend]
+module-name = "mqtt_dos"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 99
-src = ["scripts", "paretto", "notebooks_refactored"]
+src = ["src", "tests"]
 include = [
     "pyproject.toml",
-    "main.py",
-    "scripts/**/*.py",
-    "paretto/**/*.py",
-    "notebooks_refactored/**/*.py",
+    "src/**/*.py",
+    "tests/**/*.py",
+    "notebooks/training.ipynb",
 ]
 
 [tool.ruff.lint]
@@ -37,4 +44,14 @@ extend-select = ["I"]  # Add import sorting
 
 [tool.ruff.lint.isort]
 force-sort-within-sections = true
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.4.0",
+    "mkdocs<2",
+    "mkdocs-material>=9.7.7",
+    "nbclient>=0.11.0",
+    "pytest>=9.1.1",
+    "ruff>=0.17.0",
+]
 

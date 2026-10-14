@@ -1,0 +1,80 @@
+site_name: MQTT DoS — treino unificado
+site_description: Curso para construir, passo a passo, o pipeline de treino unificado de detecção de ataques DoS em MQTT (7 modelos × 6 seletores).
+theme:
+  name: material
+  language: pt-BR
+  features:
+    - navigation.footer
+    - navigation.sections
+    - navigation.top
+    - content.code.annotate
+    - content.code.copy
+    - content.tabs.link
+    - search.highlight
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7
+        name: Mudar para modo escuro
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-4
+        name: Mudar para modo claro
+extra_css:
+  - stylesheets/extra.css
+# O docs/ contém material antigo do projeto que não faz parte do curso.
+exclude_docs: |
+  /docs/
+  /mkdocs.yml
+  /README.md
+  /model_training1.md
+  /model_training2.md
+  /pipeline_refactored.md
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets:
+      base_path: ["."]
+      check_paths: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+nav:
+  - Início: index.md
+  - Curso:
+      - "01-1 Ambiente com uv": 01-1-ambiente-com-uv.md
+      - "01-2 Pacote e primeiro teste": 01-2-pacote-e-primeiro-teste.md
+      - "01-3 Ruff e notebook": 01-3-ruff-e-notebook.md
+  - Apoio:
+      - Glossário: glossario.md
+      - Referência rápida: referencia.md
+      - Recursos: recursos.md
+  - Projeto:
+      - Log de Decisões: decisions.md
+      - Especificação: issues/0000-spec-treino-unificado.md
+      - "01 Scaffolding": issues/01-scaffolding.md
+      - "02 Carga e limpeza": issues/02-carga-e-limpeza.md
+      - "03 Gaps sem vazamento": issues/03-gaps-sem-vazamento.md
+      - "04 Split, Pipeline e avaliação": issues/04-split-pipeline-avaliacao.md
+      - "05 Registro de modelos e baseline": issues/05-registro-de-modelos-e-baseline.md
+      - "06 Seleção de features": issues/06-selecao-de-features.md
+      - "07 Optuna por seletor": issues/07-optuna-por-seletor.md
+      - "08 Artefatos e análise": issues/08-artefatos-e-analise.md

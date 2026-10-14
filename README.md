@@ -15,6 +15,14 @@ reaches **F1 ≈ 0.975** with only 12 features and ~96 ms batch inference time o
 (see [`reports_refactored/RELATORIO_FINAL.md`](reports_refactored/RELATORIO_FINAL.md) and
 [`paretto/`](paretto/) for the full accuracy/time/memory trade-off analysis).
 
+## Refactoring in progress
+
+The training scheme is being unified (7 models x 6 feature selectors, Optuna protocol from the WPMC paper,
+every saved model a full inference `Pipeline`). The work is documented as a MkDocs course:
+decisions in [`docs/decisions.md`](docs/decisions.md), glossary in [`GLOSSARY.md`](GLOSSARY.md),
+spec and tickets in [`docs/issues/`](docs/issues/). The existing notebooks, `scripts/` and
+`api_inference/` stay untouched until the new scheme is complete.
+
 ## Project layout
 
 This repo has **two independent parts** with separate dependencies — do not mix their

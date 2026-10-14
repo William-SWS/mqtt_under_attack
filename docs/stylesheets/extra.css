@@ -1,0 +1,19 @@
+/* Vermelho "framboesa" inspirado no logotipo do Raspberry Pi */
+[data-md-color-primary="custom"] {
+  --md-primary-fg-color: #bc1142;
+  --md-primary-fg-color--light: #d9486c;
+  --md-primary-fg-color--dark: #8c0d31;
+  --md-primary-bg-color: #ffffff;
+}
+
+[data-md-color-accent="custom"] {
+  --md-accent-fg-color: #c51a4a;
+  --md-accent-fg-color--transparent: rgba(197, 26, 74, 0.1);
+  --md-accent-bg-color: #ffffff;
+}
+
+/* No modo escuro, links precisam de um tom mais claro para manter contraste */
+[data-md-color-scheme="slate"][data-md-color-accent="custom"] {
+  --md-accent-fg-color: #ef6f8f;
+  --md-typeset-a-color: #ef6f8f;
+}

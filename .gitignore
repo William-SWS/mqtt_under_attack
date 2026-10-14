@@ -13,7 +13,7 @@
 /.code-review-graph/
 .vscode/
 .agent
-docs/
+api_inference/docs/
 
 ## https://github.com/github/gitignore/blob/e8554d85bf62e38d6db966a50d2064ac025fd82a/Python.gitignore
 
@@ -197,3 +197,5 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
+# MkDocs build output
+site/

@@ -2,6 +2,45 @@
 
 > Context for agent sessions. Read before making changes.
 
+## Refatoração em curso: treino unificado (projeto-curso)
+
+Decisões em `docs/decisions.md` (log append-only), vocabulário em `GLOSSARY.md`, spec e tickets em
+`docs/issues/` (`0000-*` é a spec, `01`–`08` são os tickets, em ordem de dependência).
+
+**Alvo:** pacote `src/mqtt_dos/` + notebook `notebooks/training.ipynb`: 7 modelos (LDA, QDA, GaussianNB,
+DecisionTree, RandomForest, GradientBoosting, SVM) × 6 seletores (LowVariance, ANOVA, MutualInformation,
+Lasso, LinearSVC, ExtraTrees), Optuna com o protocolo do paper WPMC, artefatos em `outputs/<run_name>/`.
+Cada modelo salvo é um `Pipeline` que aceita features brutas.
+
+**Este repo é um curso.** O usuário digita o código seguindo as aulas, então:
+- implementar um ticket = escrever a aula `docs/NN-slug.md` com a skill `mkdocs-project-course`
+  (`/mkdocs-project-course init`, depois `/mkdocs-project-course <ticket>` e `/mkdocs-project-course progresso`);
+- **não** escreva `src/` nem `tests/` por conta própria; só com pedido explícito do usuário;
+- nunca faça commit, push ou PR; no máximo sugira a mensagem de commit;
+- registre toda decisão nova no fim de `docs/decisions.md` (nunca reescreva entradas antigas);
+- docs em pt-BR, identificadores de código em inglês.
+
+**Intocáveis nesta fase:** `api_inference/`, `scripts/` (e `main.py`, que os orquestra), `paretto/`,
+`04_pipeline.ipynb`, `04_svm.ipynb` e seus artefatos. Nada é apagado; a lista de limpeza futura está na spec.
+O código novo não escreve em `api_inference/` nem em `models/`/`reports_refactored/`.
+
+**Comandos do novo projeto:** `uv sync`, `uv run pytest`, `uv run ruff check`, `uv run ruff format --check`,
+`uv run mkdocs serve`. O ruff verifica só `src/`, `tests/` e `notebooks/training.ipynb` (o código antigo já
+falha no ruff e não pode ser alterado). O notebook usa o kernel `.venv/bin/python`, e `tests/test_notebook.py`
+o executa inteiro.
+
+**Exceções à regra do curso:** a usuária pediu explicitamente que o agente implementasse as aulas 01-1, 01-2
+e 01-3 (decisões 34 e 38). Isso não vale para as próximas aulas: pergunte, ou espere o pedido.
+
+## Notas herdadas do CLAUDE.md anterior
+
+- Estratégias de valores ausentes avaliadas historicamente: `fillna(0)` global antes do split (vaza),
+  `SimpleImputer(constant, 0)` pós-split (adotada) e `SimpleImputer(median)` (piora LDA/QDA).
+- DecisionTree foi o modelo com maior F1 (~0.975) nos resultados antigos; LDA/QDA são sensíveis à imputação.
+- Fluxo antigo: dados em `data/raw/` → modelos em `models_optimized/` e `models/models_ensemble_v2/` →
+  relatórios em `reports_refactored/`. Guia de deploy no Raspberry Pi em `raspberry_deploy.md`.
+- O `CLAUDE.md` descrevia um pacote `mqtt_under_attack/` que não existe no repositório; ignore essa referência.
+
 ## Active Branch
 
 `inference` — all work happens here.
@@ -98,3 +137,15 @@ SVM has no F1 in optuna results — uses accuracy as proxy.
 1. `fillna(0)` pre-split causes data leakage — always impute post-split via `SimpleImputer`
 2. `scipy.stats.mode` rejects string arrays in newer scipy — use `pandas.DataFrame().mode()` instead
 3. Ensemble before Optuna dilutes strong models — ensemble only after optimization
+
+## Convenções do curso
+
+- O curso vem antes do código: cada ticket ganha uma aula `docs/NN-slug.md` escrita com
+  `/mkdocs-project-course <ticket>` (uma por ticket, dividida quando houver conceitos demais); o progresso
+  da aprendiz é registrado com `/mkdocs-project-course progresso`.
+- `course/` guarda o estado da aprendiz (missão, preferências, registros de aprendizado, histórico).
+  Antes de mexer no curso, qualquer agente ou ferramenta lê `course/MISSION.md`, as últimas entradas e as
+  pendências abertas de `course/LOG.md`, `course/learning-records/` e `course/NOTES.md`; cada aula escrita
+  ou revisada e cada check-in entra como nova entrada no fim de `course/LOG.md`.
+- `src/` e `tests/` são escritos pela usuária seguindo as aulas; um agente só escreve código real a pedido explícito.
+- Site: `uv run mkdocs serve` (ambiente do projeto criado na aula 01-1; o `.venv` antigo está em `.venv-legacy`).
