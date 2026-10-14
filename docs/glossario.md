@@ -50,3 +50,27 @@ _Evite_: interpretador do notebook. Aula: [01-3](01-3-ruff-e-notebook.md#kernel-
 ### Teste de execução do notebook
 Um teste que roda todas as células de um notebook num kernel novo, de cima a baixo, e falha se alguma der erro (`nbclient`).
 _Evite_: smoke test do notebook. Aula: [01-3](01-3-ruff-e-notebook.md#teste-de-execucao-do-notebook)
+
+### Limpeza orientada à implantação
+A remoção das colunas que não generalizam para tráfego novo ou não existem quando o modelo roda em produção (identificadores, timestamps absolutos, endereços, portas, campos textuais e de sessão). Deixa as 20 preditoras mais o rótulo.
+_Evite_: feature selection (é outra etapa), limpeza de dados genérica. Aula: [02](02-carga-e-limpeza.md#limpeza-orientada-a-implantacao)
+
+### Ausência estrutural
+Um valor ausente que significa "este campo não existe neste pacote" (um pacote que não é MQTT não tem `mqtt.msgtype`), e não uma falha de captura. Justifica a imputação constante 0.
+_Evite_: dado faltante, missing aleatório. Aula: [02](02-carga-e-limpeza.md#ausencia-estrutural-de-valores)
+
+### Aviso
+Uma mensagem emitida com `warnings.warn` sobre algo inesperado que não impede o programa de continuar; testada com `pytest.warns`.
+_Evite_: warning (em textos em português), log. Aula: [02](02-carga-e-limpeza.md#avisos)
+
+### Feature de gap
+O tempo, em segundos, desde a mensagem anterior do mesmo tipo (PUBLISH ou CONNECT) no fluxo inteiro de pacotes, em ordem de tempo; 0 nas primeiras ocorrências e nos pacotes de outros tipos. É causal: depende só de pacotes que já passaram.
+_Evite_: intervalo entre pacotes (sem dizer o tipo), delta. Aula: [03](03-gaps-sem-vazamento.md#feature-de-gap)
+
+### Vazamento
+Usar, para construir o modelo, informação que não existe na hora da predição: o rótulo (vazamento de rótulo), dados do teste ou identificadores. Produz métricas otimistas que não se repetem em produção.
+_Evite_: leakage (em textos em português), contaminação. Aula: [03](03-gaps-sem-vazamento.md#vazamento-de-rotulo)
+
+### Alinhamento por índice
+A regra do pandas de casar valores pelos rótulos do índice, e não pela posição, ao atribuir colunas ou combinar `Series`. `sort_values` mantém os rótulos; `reindex` devolve os valores na ordem de outro índice.
+_Evite_: merge por posição, `.values` para atribuir. Aula: [03](03-gaps-sem-vazamento.md#alinhamento-por-indice)

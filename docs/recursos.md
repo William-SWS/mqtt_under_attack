@@ -27,6 +27,21 @@ Fontes confiáveis em que o curso se baseia, todas lidas durante a montagem.
   Configuração do linter e formatador. Use para: `[tool.ruff]`, `include`, notebooks, `check` x `format`.
 - [nbclient — Executing notebooks](https://nbclient.readthedocs.io/en/latest/client.html)
   Execução programática de notebooks. Use para: `NotebookClient`, `CellExecutionError`.
+- [pandas — Working with missing data](https://pandas.pydata.org/docs/user_guide/missing_data.html)
+  Como o pandas representa ausentes (`NaN`, `NA`, `NaT`) e como detectá-los. Use para: `isna()`, análise de nulos.
+  - [read_csv](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html): parâmetro `low_memory` e inferência de tipos.
+  - [DataFrame.drop](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.drop.html): `columns`, `errors`, retorno de cópia.
+  - [Intro to data structures](https://pandas.pydata.org/docs/user_guide/dsintro.html): alinhamento automático por rótulo entre `Series`.
+  - [Series.diff](https://pandas.pydata.org/docs/reference/api/pandas.Series.diff.html), [Series.reindex](https://pandas.pydata.org/docs/reference/api/pandas.Series.reindex.html) e [Series.sort_values](https://pandas.pydata.org/docs/reference/api/pandas.Series.sort_values.html): o cálculo dos gaps.
+  - [testing.assert_frame_equal](https://pandas.pydata.org/docs/reference/api/pandas.testing.assert_frame_equal.html): comparar tabelas em testes.
+- [Python — warnings](https://docs.python.org/3/library/warnings.html)
+  Avisos do Python. Use para: `warnings.warn`, categorias, `stacklevel`.
+- [pytest — How to capture warnings](https://docs.pytest.org/en/stable/how-to/capture-warnings.html) e [How to use temporary directories and files](https://docs.pytest.org/en/stable/how-to/tmp_path.html)
+  `pytest.warns` e o fixture `tmp_path`.
+- Paper *Deployment-Aware Machine Learning for DoS Detection in Edge-Based IoT Networks* (WPMC 2026)
+  O artigo da aprendiz. Use para: o critério da limpeza (seção III), a Tabela I e o protocolo de otimização.
+- [scikit-learn — Common pitfalls and recommended practices](https://scikit-learn.org/stable/common_pitfalls.html)
+  Vazamento de dados e pré-processamento ajustado só no treino. Use para: aulas 03 e 04.
 - [Guia do usuário do scikit-learn](https://scikit-learn.org/stable/user_guide.html)
   Cobre seleção de features (seção 1.13), pipelines (8.1), métricas (3.4) e validação cruzada (3.1). Use para: seletores, `Pipeline`, avaliação.
 - [Documentação do Optuna](https://optuna.readthedocs.io/en/stable/)

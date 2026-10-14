@@ -55,6 +55,31 @@ link para a aula que o ensinou. Cresce a cada aula.
 | `dataclasses.replace(obj, campo=valor)` | criar uma variação de uma dataclass congelada | [01-2](01-2-pacote-e-primeiro-teste.md) |
 | `Path(__file__).resolve().parents[N]` | caminho estável a partir do próprio arquivo | [01-2](01-2-pacote-e-primeiro-teste.md) |
 
+## pandas
+
+| Padrão | Quando usar | Aula |
+|---|---|---|
+| `pd.read_csv(path, low_memory=False)` | ler o CSV do Wireshark sem tipos misturados por pedaço | [02](02-carga-e-limpeza.md) |
+| `df.drop(columns=[...])` | remover colunas (devolve um DataFrame novo) | [02](02-carga-e-limpeza.md) |
+| `df.isna().mean().mul(100).round(1)` | percentual de nulos por coluna | [02](02-carga-e-limpeza.md) |
+| `df.isna().groupby(df["type"]).mean().T` | percentual de nulos por coluna e por classe | [02](02-carga-e-limpeza.md) |
+| `df["type"].value_counts()` | contar registros por classe | [02](02-carga-e-limpeza.md) |
+| `s.sort_values(kind="stable")` | ordenar mantendo os rótulos e a ordem entre empates | [03](03-gaps-sem-vazamento.md) |
+| `s.diff().fillna(0.0)` | diferença para o valor anterior (o primeiro vira 0) | [03](03-gaps-sem-vazamento.md) |
+| `s.reindex(df.index, fill_value=0.0)` | voltar para a ordem de `df`, preenchendo rótulos ausentes | [03](03-gaps-sem-vazamento.md) |
+| `pd.concat([f(g) for _, g in df.groupby("type")])` | aplicar uma função a cada grupo e juntar | [03](03-gaps-sem-vazamento.md) |
+| `df.ne(0).groupby(df["type"]).sum()` | contar valores não nulos por classe | [03](03-gaps-sem-vazamento.md) |
+
+## Avisos e testes de tabelas
+
+| Padrão | Quando usar | Aula |
+|---|---|---|
+| `warnings.warn("...", stacklevel=2)` | avisar sem interromper, apontando para quem chamou | [02](02-carga-e-limpeza.md) |
+| `with pytest.warns(UserWarning, match="..."):` | afirmar que um aviso aparece | [02](02-carga-e-limpeza.md) |
+| `def test_x(tmp_path):` | pedir uma pasta temporária nova ao pytest | [02](02-carga-e-limpeza.md) |
+| `assert_frame_equal(a, b)` | comparar duas tabelas inteiras num teste (`pandas.testing`) | [03](03-gaps-sem-vazamento.md) |
+| teste "muda o rótulo, o resultado não muda" | travar vazamento de rótulo numa feature | [03](03-gaps-sem-vazamento.md) |
+
 ## ruff
 
 | Comando | Quando usar | Aula |

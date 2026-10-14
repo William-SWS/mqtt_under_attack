@@ -60,8 +60,8 @@ Digitar fixa mais do que copiar, e lembrar sem olhar fixa mais do que reler.
 | [01-1](01-1-ambiente-com-uv.md) | Ambiente do projeto com `uv`, manifesto e lockfile | [01](issues/01-scaffolding.md) | disponível (implementada) |
 | [01-2](01-2-pacote-e-primeiro-teste.md) | Pacote `src/mqtt_dos`, configuração do run e primeiro teste com pytest | [01](issues/01-scaffolding.md) | disponível (implementada) |
 | [01-3](01-3-ruff-e-notebook.md) | ruff e notebook ligado ao ambiente | [01](issues/01-scaffolding.md) | disponível (implementada) |
-| 02 | Carga do CSV bruto e limpeza para 20 colunas | [02](issues/02-carga-e-limpeza.md) | em breve |
-| 03 | Gaps de publish e connect sem vazamento | [03](issues/03-gaps-sem-vazamento.md) | em breve |
+| [02](02-carga-e-limpeza.md) | Carga do CSV bruto e limpeza para 20 colunas | [02](issues/02-carga-e-limpeza.md) | disponível |
+| [03](03-gaps-sem-vazamento.md) | Gaps de publish e connect sem vazamento | [03](issues/03-gaps-sem-vazamento.md) | disponível |
 | 04 | Split, Pipeline de inferência e avaliação de um modelo | [04](issues/04-split-pipeline-avaliacao.md) | em breve |
 | 05 | Registro dos sete modelos e baseline | [05](issues/05-registro-de-modelos-e-baseline.md) | em breve |
 | 06 | Seleção de features com seis seletores | [06](issues/06-selecao-de-features.md) | em breve |

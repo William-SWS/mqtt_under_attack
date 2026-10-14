@@ -107,3 +107,17 @@ posterior. Nada do que é antigo é apagado nesta fase.
 38. **Aulas 01-2 e 01-3 implementadas pelo agente**, a pedido explícito da usuária, como exceção à decisão 5
     (como a decisão 34 para a 01-1). O ticket 01 está concluído: `uv run pytest` (9 testes, incluindo a
     execução do notebook), `uv run ruff check` e `uv run ruff format --check` passam.
+39. **A partir da aula 02 a usuária digita o código** seguindo as aulas; a regra da decisão 5 volta a valer
+    integralmente (as exceções 34 e 38 cobriram só o ticket 01).
+
+## 2026-10-14
+
+40. **`DROP_COLUMNS` e `TARGET_COLUMN` ficam em `mqtt_dos/data.py`**, junto da limpeza que os usa, e não em
+    `config.py` como esboçado no plano. A lista é exatamente a do `04_pipeline.ipynb` (46 colunas, 4 grupos
+    comentados).
+41. **Ordem do pipeline de dados:** `load_raw → add_gaps → drop_unused_columns`. Os gaps precisam de
+    `frame.time_epoch`, que a limpeza remove; o código antigo lia o CSV duas vezes para contornar isso.
+42. **ADR 0001 criado** (`docs/adr/0001-gaps-sem-rotulo.md`) para a decisão 2, com a medição do efeito do
+    vazamento antigo neste dataset (pequeno nos números, decisivo no método).
+43. **`message_gap` usa alinhamento por índice** (`sort_values` + `reindex`) e não depende de o CSV estar
+    ordenado por tempo. Índices duplicados não são suportados na versão da aula (exercício 2 mostra como).

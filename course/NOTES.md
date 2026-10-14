@@ -5,3 +5,4 @@
 - Quer profundidade conceitual (como cada seletor, cada modelo, a otimização, a engenharia de features e a limpeza funcionam), não só o código.
 - Visual do site: vermelho framboesa, com alternador claro/escuro.
 - Prefere não digitar passos triviais de infraestrutura (ambiente, instalação de ferramentas); pode pedir que o agente os implemente. Guardar o detalhe para limpeza, features, seletores, modelos e otimização.
+- Antes de começar uma etapa nova, gosta de um resumo do que cada tópico traz e por que importa para a refatoração.

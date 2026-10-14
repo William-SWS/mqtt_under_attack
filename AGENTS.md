@@ -30,7 +30,7 @@ falha no ruff e não pode ser alterado). O notebook usa o kernel `.venv/bin/pyth
 o executa inteiro.
 
 **Exceções à regra do curso:** a usuária pediu explicitamente que o agente implementasse as aulas 01-1, 01-2
-e 01-3 (decisões 34 e 38). Isso não vale para as próximas aulas: pergunte, ou espere o pedido.
+e 01-3 (decisões 34 e 38). A partir da aula 02 a usuária digita o código (decisão 39): escreva só as aulas.
 
 ## Notas herdadas do CLAUDE.md anterior
 

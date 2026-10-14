@@ -11,3 +11,8 @@
 - [ ] Remover coluna inexistente não quebra; colunas ausentes na lista são ignoradas com aviso.
 - [ ] Testes unitários com dados sintéticos cobrem a limpeza.
 - [ ] O notebook mostra a distribuição de classes e a tabela de nulos por coluna.
+- [x] Aula do curso escrita: `docs/02-carga-e-limpeza.md`
+
+## Notas de execução
+
+- Aula 02 escrita: ver `course/LOG.md`, entrada nº 19. Código a ser digitado pela usuária.

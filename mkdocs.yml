@@ -63,12 +63,15 @@ nav:
       - "01-1 Ambiente com uv": 01-1-ambiente-com-uv.md
       - "01-2 Pacote e primeiro teste": 01-2-pacote-e-primeiro-teste.md
       - "01-3 Ruff e notebook": 01-3-ruff-e-notebook.md
+      - "02 Carga e limpeza": 02-carga-e-limpeza.md
+      - "03 Gaps sem vazamento": 03-gaps-sem-vazamento.md
   - Apoio:
       - Glossário: glossario.md
       - Referência rápida: referencia.md
       - Recursos: recursos.md
   - Projeto:
       - Log de Decisões: decisions.md
+      - "ADR 0001: gaps sem rótulo": adr/0001-gaps-sem-rotulo.md
       - Especificação: issues/0000-spec-treino-unificado.md
       - "01 Scaffolding": issues/01-scaffolding.md
       - "02 Carga e limpeza": issues/02-carga-e-limpeza.md

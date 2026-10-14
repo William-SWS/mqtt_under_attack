@@ -12,3 +12,8 @@
 - [ ] A tabela final tem 22 colunas preditoras mais `type`.
 - [ ] O notebook mostra histogramas e boxplots dos gaps por classe.
 - [ ] Decisão registrada em `docs/decisions.md`; ADR "gaps sem `type`" criado.
+- [x] Aula do curso escrita: `docs/03-gaps-sem-vazamento.md`
+
+## Notas de execução
+
+- Aula 03 escrita: ver `course/LOG.md`, entrada nº 25. Código a ser digitado pela usuária. ADR "gaps sem `type`" criado: `docs/adr/0001-gaps-sem-rotulo.md`.
