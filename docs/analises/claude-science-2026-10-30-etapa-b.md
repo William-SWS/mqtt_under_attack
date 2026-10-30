@@ -22,14 +22,15 @@ ticket: ela entra no relatório como "não adotada", com o motivo da autora.
    teste, nunca a implementação.
 3. **Nenhum arquivo de ticket é renomeado ou apagado.** Os nomes atuais de 04–08 são referenciados por
    `mkdocs.yml` e `docs/index.md`.
-4. **Git:**
-   - trabalhar no branch `analise/claude-science-2026-10-30`;
-   - um commit por mudança lógica, com mensagem em português;
-   - sem `push` nem `merge`;
-   - **nunca** usar `git add -A`, `git add .` ou `git commit -a`. O `git status` pode mostrar como apagados
-     arquivos de `.claude/` e `.vscode/` (efeito do ambiente, que mascara esses diretórios). Eles não podem
-     entrar em commit;
-   - adicionar sempre por caminho explícito: `git add docs/issues/09-unidade-do-split.md`.
+4. **Git: o agente não executa nenhuma operação de git.** Isso inclui `git add`, `commit`, `branch`,
+   `switch -c`, `checkout -b`, `merge`, `rebase`, `push`, abrir PR, `stash` e `reset` (decisão 65). O agente
+   só edita arquivos e, ao fim de cada mudança lógica, **sugere** à autora o comando e a mensagem de commit,
+   em português, com os caminhos explícitos. Quem executa é a autora.
+   - Sugira sempre `git add <caminho explícito>`, nunca `git add -A`, `git add .` ou `git commit -a`. No
+     ambiente da autora isso é só boa prática; no sandbox do Claude Science, `.claude/` e `.vscode/`
+     aparecem como apagados.
+   - Pare depois de cada grupo de commits sugeridos na §1 e espere a autora confirmar que os executou antes
+     de seguir, para que cada commit dela contenha só uma mudança lógica.
 5. **Formato de ticket** (o dos tickets 01–08, mais os campos exigidos pelo briefing):
 
    ```markdown
@@ -55,19 +56,22 @@ ticket: ela entra no relatório como "não adotada", com o motivo da autora.
 
    Se a autora disser que a skill define outro formato (P6), siga a skill e registre a divergência no
    relatório.
-6. **Decisões:** o texto das decisões 44–64 está na §4 do relatório. Copie-o literalmente, preencha a data
+6. **Decisões:** o texto das decisões 44–65 está na §4 do relatório. Copie-o literalmente, preencha a data
    de aprovação e ajuste só o que a autora mandar.
 
 ---
 
-## 1. Sequência de commits
+## 1. Sequência de commits sugeridos (executados pela autora, nunca pelo agente)
+
+A mensagem fica na coluna da direita. O agente escreve os arquivos de uma linha, mostra
+`git add <arquivos> && git commit -m "<mensagem>"` e espera.
 
 | # | Arquivo(s) | Mensagem |
 |---|---|---|
 | 1 | `docs/adr/0002-unidade-do-split.md` | `docs(adr): ADR 0002 unidade do split` |
 | 2 | `docs/adr/0003-contrato-de-dados-treino-api.md` | `docs(adr): ADR 0003 contrato de dados treino → API` |
 | 3 | `docs/adr/0004-escopo-da-medicao-de-recursos.md` | `docs(adr): ADR 0004 escopo da medição de recursos` |
-| 4 | `docs/decisions.md` (acrescentar a §4 do relatório) | `docs(decisoes): decisões 44–64 da análise de 2026-10-30` |
+| 4 | `docs/decisions.md` (acrescentar a §4 do relatório) | `docs(decisoes): decisões 44–65 da análise de 2026-10-30` |
 | 5 | `docs/issues/0000-spec-treino-unificado.md` | `docs(spec): spec 0000 vira a spec da fase 1 (treino)` |
 | 6 | `docs/issues/0001-spec-avaliacao-e-selecao.md` | `docs(spec): spec 0001 da fase 2 (avaliação e seleção)` |
 | 7 | `docs/issues/0002-spec-inferencia-no-dispositivo.md` | `docs(spec): spec 0002 da fase 3 (inferência e medição)` |
@@ -76,7 +80,7 @@ ticket: ela entra no relatório como "não adotada", com o motivo da autora.
 | 27 | `GLOSSARY.md` | `docs(glossario): termos das fases 1–3` |
 | 28 | `docs/analises/claude-science-2026-10-30.md` | `docs(analise): seção final da Etapa B` |
 
-## 2. Checagens antes do último commit
+## 2. Checagens antes de sugerir o último commit
 
 1. `uv run mkdocs build --strict -d /tmp/site-check` termina com código 0. Os arquivos novos não estão na
    `nav`, e isso gera só INFO.
@@ -822,7 +826,7 @@ dos gaps online no Pi, e medição do caminho pacote → veredito.
     de seleção.
   - 34: Como engenheiro de inferência, quero o teste em `.npy` com predições esperadas e hashes, para provar
     que o Pi roda o modelo e os dados do treino.
-- **Implementation Decisions:** troque a referência "D1–D25" por "D1–D64". No item **Split**, acrescente
+- **Implementation Decisions:** troque a referência "D1–D25" por "D1–D65". No item **Split**, acrescente
   `split_strategy` (D44) e a chave de fluxo (D45). No item **Avaliação**, acrescente MCC, recortes e IC
   (D49–D50). No item **Tuning**, acrescente `cv_splitter` e as métricas de CV (D46, D48). No item
   **Artefatos**, use a lista da D52.

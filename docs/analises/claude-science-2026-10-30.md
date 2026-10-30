@@ -1,8 +1,12 @@
 # Análise metodológica e mapa de reestruturação — Etapa A
 
 **Data:** 2026-10-30 · **Briefing:** `docs/claude-science-melhorias.md` (sha256 `3130854f…21e4f`) ·
-**Branch:** `analise/claude-science-2026-10-30` (a partir de `refact/repository_structure`, commit `51f6861`)
-· **Status:** ponto de parada. A Etapa B só começa depois da aprovação da autora.
+**Base:** `refact/repository_structure`, commit `51f6861` · **Status:** ponto de parada. A Etapa B só começa
+depois da aprovação da autora.
+
+> **Nota (2026-10-30):** o branch `analise/claude-science-2026-10-30` e os commits `29223bb` e `8981a21`
+> foram criados pelo agente, seguindo o §0 do briefing. A regra da autora, registrada como decisão 65, é
+> que nenhum agente executa operações de git. A partir daqui, toda operação de git é só sugerida.
 
 Este arquivo fica em `docs/analises/` e **não** está na `nav` do `mkdocs.yml`. Não há convenção da skill para
 relatórios que eu tenha conseguido ler (ver §0.2), então usei o caminho sugerido no briefing. Caminhos são
@@ -621,6 +625,10 @@ autora em AAAA-MM-DD. Números entre colchetes referem-se às seções do relat�
 64. **Notebook de experimentos.** Os experimentos dos tickets 09, 11, 12 e 14 ficam em
     `notebooks/experiments.ipynb`, que roda em modo smoke no teste. O `notebooks/training.ipynb` continua só
     com o caminho do artigo. Complementa a decisão 7.
+65. **Git só pelo humano.** Nenhum agente executa operações de git: `add`, `commit`, criação de branch,
+    `merge`, `rebase`, `push` ou abertura de PR. O agente sugere o comando e a mensagem, e a autora executa.
+    Prevalece sobre o §0 do briefing `docs/claude-science-melhorias.md` e reafirma a regra do `AGENTS.md`
+    ("nunca faça commit, push ou PR").
 ```
 
 ---
@@ -672,8 +680,8 @@ Rode do usuário que vai executar a API, com a API parada.
 11. **"Mais de 50" configurações:** contei 42 + 7 de baseline = 49. Há outra variação a considerar?
 12. **Proveniência do t16:** qual CSV e qual `.pkl` deram a acurácia 0,9688 para `lowvariance_decisiontree`,
     contra 0,9754 no relatório de treino?
-13. **Commits:** o `AGENTS.md` diz "nunca faça commit"; o briefing pede commits num branch novo. Para a Etapa
-    B, vale o briefing?
+13. **Commits (respondida em 2026-10-30):** nenhum agente executa operações de git (commit, branch, merge,
+    PR). Elas são só sugeridas e a autora as executa. Isso prevalece sobre o §0 do briefing (decisão 65).
 14. **Energia:** há orçamento para um INA219 ou medidor USB? Se houver, a decisão 63 muda e entra um ticket de
     energia.
 
